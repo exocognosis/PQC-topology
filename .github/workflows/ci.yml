@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: Property tests, lint and example
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_wrapper: false
+      - run: pip install numpy scipy pytest hypothesis
+      - run: make -C testbed lint test
+      - run: python3 examples/estate_risk.py examples/estate.json
+
+  lean:
+    name: Lean proofs
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lean
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install elan
+        run: |
+          curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh | sh -s -- -y --default-toolchain none
+          echo "$HOME/.elan/bin" >> "$GITHUB_PATH"
+      - run: lake exe cache get
+      - run: lake build
+      - name: No sorry
+        run: |
+          ! grep -n "sorry" TopoPQC.lean

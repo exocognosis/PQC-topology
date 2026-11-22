@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Questions and discussion
+    url: https://github.com/exocognosis/PQC-topology/discussions
+    about: Ask about applying the model to your estate, or discuss PQC migration planning.

@@ -1,0 +1,37 @@
+cff-version: 1.2.0
+message: "If you use this model, code or testbed, please cite the paper."
+title: "PQC-topology: Topological Post-Quantum Cryptography Discovery"
+type: software
+authors:
+  - family-names: Glenn
+    given-names: Rick
+    affiliation: "Dytallix, Inc."
+repository-code: "https://github.com/exocognosis/PQC-topology"
+license: Apache-2.0
+date-released: 2026-11-21
+keywords:
+  - post-quantum cryptography
+  - PQC migration
+  - harvest now, decrypt later
+  - trust now, forge later
+  - Mosca inequality
+  - cryptographic inventory
+  - CBOM
+  - crypto-agility
+  - ML-KEM
+  - ML-DSA
+  - TLS
+  - SSH
+  - risk assessment
+  - Lean 4
+  - formal verification
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Glenn
+      given-names: Rick
+      affiliation: "Dytallix, Inc."
+  title: "Topological Post-Quantum Cryptography Discovery: A Typed Graph Model of Harvest-Now and Forge-Later Risk, with Exposure Windows, Break-Time Semantics, and Remediation Planning"
+  year: 2026
+  url: "https://github.com/exocognosis/PQC-topology"
+  status: preprint

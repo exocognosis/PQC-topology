@@ -346,7 +346,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],macr
   <li><strong>Stationarity.</strong> Shares measured today are applied to the whole history \(H_e(d)\). If the classical share has fallen over time, the measured share underestimates historical exposure, and the sunk part should use historical telemetry or the worst-case reading.</li>
   <li><strong>Passive adversary.</strong> An adversary who can force classical fallback is active and outside the HNDL threat model (§3). The worst-case reading covers that case.</li>
 </ul>
-<p>Mixed channels also add a remediation action. Besides migrating a channel, an operator can remove its classical fallback, which drives \(q_e(k_0)\) to zero at the cost of refusing legacy clients. By Proposition 7(b), that action is worth \(O(e)\, q_e(k_0)\, W_{e,k_0}(d)\) on the channel, before aggregation.</p>
+<p>Mixed channels also add a remediation action. Besides migrating a channel, an operator can remove its classical fallback, which drives \(q_e(k_0)\) to zero at the cost of refusing legacy clients. Sessions already recorded stay exposed, so the action removes only the remediable part, exactly as migrating the channel now would. If every other configuration is never broken, Propositions 7(b) and 7(f) give its value on the channel, before aggregation, as \(O(e)\, q_e(k_0) \min\{\tfix(e), W_{e,k_0}(d)\}\) under the share-weighted reading. Under the worst-case reading it is \(O(e) \min\{\tfix(e), W_{e,k_0}(d)\}\), whatever the share. The two actions therefore differ in cost, not in risk reduction.</p>
 </section>
 
 <section id="s7">

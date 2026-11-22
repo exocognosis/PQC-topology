@@ -349,7 +349,7 @@ The share-weighted reading rests on three assumptions:
 \item \textbf{Passive adversary.} An adversary who can force classical fallback is active and outside the HNDL threat model (Section~\ref{sec:3}). The worst-case reading covers that case.
 \end{itemize}
 
-Mixed channels also add a remediation action. Besides migrating a channel, an operator can remove its classical fallback, which drives $q_e(k_0)$ to zero at the cost of refusing legacy clients. By Proposition 7(b), that action is worth $O(e)\, q_e(k_0)\, W_{e,k_0}(d)$ on the channel, before aggregation.
+Mixed channels also add a remediation action. Besides migrating a channel, an operator can remove its classical fallback, which drives $q_e(k_0)$ to zero at the cost of refusing legacy clients. Sessions already recorded stay exposed, so the action removes only the remediable part, exactly as migrating the channel now would. If every other configuration is never broken, Propositions 7(b) and 7(f) give its value on the channel, before aggregation, as $O(e)\, q_e(k_0) \min\{\tfix(e), W_{e,k_0}(d)\}$ under the share-weighted reading. Under the worst-case reading it is $O(e) \min\{\tfix(e), W_{e,k_0}(d)\}$, whatever the share. The two actions therefore differ in cost, not in risk reduction.
 
 \section{TNFL risk on the trust graph}\label{sec:7}
 
