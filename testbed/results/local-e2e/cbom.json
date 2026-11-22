@@ -6,7 +6,29 @@
     "component": {
       "type": "application",
       "name": "pqc-topology-testbed"
-    }
+    },
+    "properties": [
+      {
+        "name": "dytallix:coverage:classesWithLabels",
+        "value": "1.0"
+      },
+      {
+        "name": "dytallix:coverage:labeledFractionOfInferred",
+        "value": "0.727"
+      },
+      {
+        "name": "dytallix:coverage:channelsWithNegotiationData",
+        "value": "1.0"
+      },
+      {
+        "name": "dytallix:coverage:unknownChannels",
+        "value": "0"
+      },
+      {
+        "name": "dytallix:coverage:residualUnknownRisk",
+        "value": "0.0"
+      }
+    ]
   },
   "components": [
     {

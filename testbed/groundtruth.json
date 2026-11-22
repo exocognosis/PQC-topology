@@ -307,7 +307,39 @@
       10,
       5
     ],
-    "_comment_T_PQ": "Sensitivity: break time of the post-quantum components (ML-KEM, ML-DSA), assumption A6. Default is infinity."
+    "_comment_T_PQ": "Sensitivity: break time of the post-quantum components (ML-KEM, ML-DSA), assumption A6. Default is infinity.",
+    "T_Q_priors": [
+      {
+        "name": "uniform[5,20]",
+        "dist": "uniform",
+        "lo": 5,
+        "hi": 20
+      },
+      {
+        "name": "late uniform[10,30]",
+        "dist": "uniform",
+        "lo": 10,
+        "hi": 30
+      },
+      {
+        "name": "early 5+Exp(mean 4)",
+        "dist": "shifted_exp",
+        "shift": 5,
+        "mean": 4
+      },
+      {
+        "name": "lognormal median 12",
+        "dist": "lognormal",
+        "median": 12,
+        "sigma": 0.4
+      }
+    ],
+    "T_PQ_prior_points": [
+      "inf",
+      15,
+      10
+    ],
+    "_comment_priors": "Illustrative arrival-prior shapes, not fits to expert surveys; evaluated on 201-point quantile grids."
   },
   "ssh_listeners": [
     {
@@ -338,5 +370,45 @@
         ]
       ]
     }
+  },
+  "uncertainty": {
+    "_comment": "Parameter uncertainty for the ranking analysis. Declared values are medians; lognormal sigma 0.25 is roughly +/-25%. Per-channel or per-class specs override the default (see tools/analysis.py).",
+    "draws": 200,
+    "seed": 7,
+    "grid": 201,
+    "k": 3,
+    "default": {
+      "O": {
+        "dist": "lognormal",
+        "sigma": 0.25
+      },
+      "t_fix": {
+        "dist": "lognormal",
+        "sigma": 0.25
+      },
+      "H": {
+        "dist": "lognormal",
+        "sigma": 0.25
+      },
+      "L": {
+        "dist": "lognormal",
+        "sigma": 0.25
+      },
+      "C": {
+        "dist": "fixed"
+      }
+    },
+    "channels": {
+      "gw->client": {
+        "O": {
+          "dist": "fixed"
+        }
+      }
+    }
+  },
+  "costs": {
+    "_comment": "Remediation action costs (arbitrary units). Removing classical fallback costs the classical (legacy) session share times legacy_client_weight unless a channel sets cost_fallback.",
+    "migrate": 1.0,
+    "legacy_client_weight": 1.0
   }
 }

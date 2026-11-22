@@ -18,6 +18,7 @@ and the testbed and experiments that evaluate it.
 | [`testbed/`](testbed/) | Reproducible testbed: local Docker or Hetzner Cloud estate, discovery probe, scorer, run results |
 | [`testbed/synth/`](testbed/synth/) | Synthetic-topology experiments (scaling, inference precision, rank stability, greedy vs optimal) |
 | [`testbed/tests/`](testbed/tests/) | Property tests linking each Lean theorem to the scorer and engine code |
+| [`testbed/tools/analysis.py`](testbed/tools/analysis.py) | Uncertainty-aware ranking, cost-aware remediation actions, complementarity, coverage, CRQC-prior sensitivity |
 
 ## Main results
 
@@ -46,6 +47,7 @@ cd testbed
 make local-run RUN=local-1 SECONDS_WINDOW=120   # local estate, ~3 minutes
 make synth                                      # synthetic experiments, ~1.5 minutes
 make test                                       # property tests (Lean statements vs code)
+python3 tools/score.py results/local-1          # rescore a run: dual readings, uncertainty, actions, coverage
 ```
 
 Cloud runs are described in [`testbed/README.md`](testbed/README.md).

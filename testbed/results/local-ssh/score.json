@@ -753,5 +753,455 @@
         "kex-strict-s-v00@openssh.com"
       ]
     }
+  ],
+  "readings": {
+    "worst_first_fix": "gw->client",
+    "share_first_fix": "lb->gw",
+    "diverge": true
+  },
+  "actions": [
+    {
+      "action": "remove_fallback",
+      "channel": "gw->client",
+      "cost": 0.258,
+      "classical_share": 0.258,
+      "gain_worst": 0.68,
+      "gain_share": 0.0,
+      "gain_per_cost_worst": 2.637
+    },
+    {
+      "action": "migrate",
+      "channel": "gw->client",
+      "cost": 1.0,
+      "gain_worst": 0.68,
+      "gain_share": 0.0,
+      "gain_per_cost_worst": 0.68
+    },
+    {
+      "action": "migrate",
+      "channel": "lb->gw",
+      "cost": 1.0,
+      "gain_worst": 0.03,
+      "gain_share": 0.733,
+      "gain_per_cost_worst": 0.03
+    },
+    {
+      "action": "migrate",
+      "channel": "appa->appb",
+      "cost": 1.0,
+      "gain_worst": 0.0,
+      "gain_share": 0.0,
+      "gain_per_cost_worst": 0.0
+    },
+    {
+      "action": "migrate",
+      "channel": "appa->lb",
+      "cost": 1.0,
+      "gain_worst": 0.0,
+      "gain_share": 0.0,
+      "gain_per_cost_worst": 0.0
+    },
+    {
+      "action": "migrate",
+      "channel": "appb->appa",
+      "cost": 1.0,
+      "gain_worst": 0.0,
+      "gain_share": 0.0,
+      "gain_per_cost_worst": 0.0
+    },
+    {
+      "action": "migrate",
+      "channel": "data->appa",
+      "cost": 1.0,
+      "gain_worst": 0.0,
+      "gain_share": 0.0,
+      "gain_per_cost_worst": 0.0
+    }
+  ],
+  "complementarity": {
+    "worst": {
+      "max_gap": 0.091,
+      "complementary_pairs": [
+        {
+          "pair": [
+            "gw->client",
+            "lb->gw"
+          ],
+          "gain_pair": 0.802,
+          "gap": 0.091
+        },
+        {
+          "pair": [
+            "appa->lb",
+            "lb->gw"
+          ],
+          "gain_pair": 0.051,
+          "gap": 0.021
+        }
+      ]
+    },
+    "share": {
+      "max_gap": 0.128,
+      "complementary_pairs": [
+        {
+          "pair": [
+            "appa->lb",
+            "lb->gw"
+          ],
+          "gain_pair": 0.862,
+          "gap": 0.128
+        }
+      ]
+    }
+  },
+  "coverage": {
+    "classes_with_labels": 1.0,
+    "labeled_fraction_of_inferred": 0.727,
+    "channels_with_negotiation_data": 1.0,
+    "unknown_channels": 0,
+    "residual_unknown_risk": 0.0,
+    "per_class": {
+      "records": {
+        "labeled_channels": 4,
+        "inferred_channels": 6,
+        "labeled_fraction_of_inferred": 0.667,
+        "unknown_channels": 0,
+        "residual_unknown_risk": 0.0
+      },
+      "profile": {
+        "labeled_channels": 4,
+        "inferred_channels": 5,
+        "labeled_fraction_of_inferred": 0.8,
+        "unknown_channels": 0,
+        "residual_unknown_risk": 0.0
+      }
+    }
+  },
+  "uncertainty": {
+    "draws": 200,
+    "grid_points": 201,
+    "prior": "U[5,20]",
+    "k": 3,
+    "rule": "robust first fix = channel with the highest P(top-1) over draws with any positive gain; ties broken by mean gain, then by name",
+    "note": "declared values are treated as medians of lognormal distributions unless a channel or class spec says otherwise",
+    "readings": {
+      "worst": {
+        "channels": [
+          {
+            "channel": "gw->client",
+            "point_gain": 0.68,
+            "mean_gain": 0.711,
+            "ci90": [
+              0.178,
+              1.239
+            ],
+            "p_top1": 0.945,
+            "p_topk": 0.985
+          },
+          {
+            "channel": "lb->gw",
+            "point_gain": 0.03,
+            "mean_gain": 0.067,
+            "ci90": [
+              0.0,
+              0.342
+            ],
+            "p_top1": 0.055,
+            "p_topk": 0.73
+          },
+          {
+            "channel": "appa->lb",
+            "point_gain": 0.0,
+            "mean_gain": 0.015,
+            "ci90": [
+              0.0,
+              0.075
+            ],
+            "p_top1": 0.0,
+            "p_topk": 0.55
+          },
+          {
+            "channel": "appa->appb",
+            "point_gain": 0.0,
+            "mean_gain": 0.0,
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p_top1": 0.0,
+            "p_topk": 0.0
+          },
+          {
+            "channel": "appb->appa",
+            "point_gain": 0.0,
+            "mean_gain": 0.0,
+            "ci90": [
+              0.0,
+              0.002
+            ],
+            "p_top1": 0.0,
+            "p_topk": 0.245
+          },
+          {
+            "channel": "data->appa",
+            "point_gain": 0.0,
+            "mean_gain": 0.0,
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p_top1": 0.0,
+            "p_topk": 0.0
+          }
+        ],
+        "robust_first_fix": "gw->client",
+        "point_first_fix": "gw->client",
+        "draws_with_zero_gain": 0
+      },
+      "share": {
+        "channels": [
+          {
+            "channel": "lb->gw",
+            "point_gain": 0.733,
+            "mean_gain": 0.739,
+            "ci90": [
+              0.0,
+              1.703
+            ],
+            "p_top1": 0.88,
+            "p_topk": 0.935
+          },
+          {
+            "channel": "appa->lb",
+            "point_gain": 0.0,
+            "mean_gain": 0.058,
+            "ci90": [
+              0.0,
+              0.309
+            ],
+            "p_top1": 0.12,
+            "p_topk": 0.57
+          },
+          {
+            "channel": "appa->appb",
+            "point_gain": 0.0,
+            "mean_gain": 0.0,
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p_top1": 0.0,
+            "p_topk": 0.0
+          },
+          {
+            "channel": "appb->appa",
+            "point_gain": 0.0,
+            "mean_gain": 0.0,
+            "ci90": [
+              0.0,
+              0.002
+            ],
+            "p_top1": 0.0,
+            "p_topk": 0.3
+          },
+          {
+            "channel": "data->appa",
+            "point_gain": 0.0,
+            "mean_gain": 0.0,
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p_top1": 0.0,
+            "p_topk": 0.0
+          },
+          {
+            "channel": "gw->client",
+            "point_gain": 0.0,
+            "mean_gain": 0.0,
+            "ci90": [
+              0.0,
+              0.0
+            ],
+            "p_top1": 0.0,
+            "p_topk": 0.0
+          }
+        ],
+        "robust_first_fix": "lb->gw",
+        "point_first_fix": "lb->gw",
+        "draws_with_zero_gain": 0
+      }
+    },
+    "readings_diverge": true
+  },
+  "prior_sensitivity": [
+    {
+      "prior": "uniform[5,20]",
+      "T_PQ": "inf",
+      "hndl": {
+        "records": {
+          "worst": 4.067,
+          "share": 2.4
+        },
+        "profile": {
+          "worst": 0.34,
+          "share": 0.25
+        }
+      }
+    },
+    {
+      "prior": "uniform[5,20]",
+      "T_PQ": 15.0,
+      "hndl": {
+        "records": {
+          "worst": 4.067,
+          "share": 2.4
+        },
+        "profile": {
+          "worst": 0.34,
+          "share": 0.25
+        }
+      }
+    },
+    {
+      "prior": "uniform[5,20]",
+      "T_PQ": 10.0,
+      "hndl": {
+        "records": {
+          "worst": 4.067,
+          "share": 3.448
+        },
+        "profile": {
+          "worst": 0.34,
+          "share": 0.25
+        }
+      }
+    },
+    {
+      "prior": "late uniform[10,30]",
+      "T_PQ": "inf",
+      "hndl": {
+        "records": {
+          "worst": 0.925,
+          "share": 0.612
+        },
+        "profile": {
+          "worst": 0.0,
+          "share": 0.0
+        }
+      }
+    },
+    {
+      "prior": "late uniform[10,30]",
+      "T_PQ": 15.0,
+      "hndl": {
+        "records": {
+          "worst": 0.925,
+          "share": 0.612
+        },
+        "profile": {
+          "worst": 0.0,
+          "share": 0.0
+        }
+      }
+    },
+    {
+      "prior": "late uniform[10,30]",
+      "T_PQ": 10.0,
+      "hndl": {
+        "records": {
+          "worst": 0.925,
+          "share": 0.925
+        },
+        "profile": {
+          "worst": 0.0,
+          "share": 0.0
+        }
+      }
+    },
+    {
+      "prior": "early 5+Exp(mean 4)",
+      "T_PQ": "inf",
+      "hndl": {
+        "records": {
+          "worst": 7.264,
+          "share": 4.1
+        },
+        "profile": {
+          "worst": 0.911,
+          "share": 0.644
+        }
+      }
+    },
+    {
+      "prior": "early 5+Exp(mean 4)",
+      "T_PQ": 15.0,
+      "hndl": {
+        "records": {
+          "worst": 7.264,
+          "share": 4.1
+        },
+        "profile": {
+          "worst": 0.911,
+          "share": 0.644
+        }
+      }
+    },
+    {
+      "prior": "early 5+Exp(mean 4)",
+      "T_PQ": 10.0,
+      "hndl": {
+        "records": {
+          "worst": 7.264,
+          "share": 5.671
+        },
+        "profile": {
+          "worst": 0.911,
+          "share": 0.644
+        }
+      }
+    },
+    {
+      "prior": "lognormal median 12",
+      "T_PQ": "inf",
+      "hndl": {
+        "records": {
+          "worst": 4.12,
+          "share": 2.441
+        },
+        "profile": {
+          "worst": 0.274,
+          "share": 0.208
+        }
+      }
+    },
+    {
+      "prior": "lognormal median 12",
+      "T_PQ": 15.0,
+      "hndl": {
+        "records": {
+          "worst": 4.12,
+          "share": 2.441
+        },
+        "profile": {
+          "worst": 0.274,
+          "share": 0.208
+        }
+      }
+    },
+    {
+      "prior": "lognormal median 12",
+      "T_PQ": 10.0,
+      "hndl": {
+        "records": {
+          "worst": 4.12,
+          "share": 3.605
+        },
+        "profile": {
+          "worst": 0.274,
+          "share": 0.208
+        }
+      }
+    }
   ]
 }

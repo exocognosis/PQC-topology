@@ -11,6 +11,7 @@ Experiments (all seeded; results in results/synth/summary.json and report.md):
   greedy     greedy and grouped heuristic (§8.2) vs optimal fix sets
 """
 import argparse
+import collections
 import itertools
 import json
 import math
@@ -55,13 +56,22 @@ PRIORS = ["uniform[5,20]", "late uniform[10,30]", "early 5+Exp(mean 4)", "lognor
 
 # --------------------------------------------------------------------------- generator
 def gen_estate(rng, n=200, layers=5, out_deg=3, p_back=0.05, f_fwd=0.6,
-               mix=(0.45, 0.35, 0.17, 0.03), edge_mix=(0.2, 0.2, 0.6, 0.0)):
+               mix=(0.45, 0.35, 0.17, 0.03), edge_mix=(0.2, 0.2, 0.6, 0.0),
+               p_write=0.0, p_repl=0.0, flow_seed=0):
     """Layered service graph with callbacks. Node 0 is the internet client.
 
     A call caller -> callee gives a read-path channel callee -> caller. Data classes
     originate at the deepest layer (and some middle nodes). The labeled flow of a class
     forwards along each outgoing channel of a node that holds it with probability f_fwd,
     so labeled is a subset of inferred by construction; f_fwd = 1 makes them equal.
+
+    Optional, off by default (the default path draws nothing extra, so seeded results are
+    unchanged); both use their own generator seeded by flow_seed:
+      p_repl   each deepest-layer store replicates to another store with this probability
+               (channel store -> replica, internal observability).
+      p_write  each gateway or first-layer service originates a write class with this
+               probability: callers send their own data down the call graph, so the class
+               moves against the read-path orientation of the channels it uses.
     """
     sizes = [max(1, n // 40)]
     rest = n - sizes[0]
@@ -102,6 +112,20 @@ def gen_estate(rng, n=200, layers=5, out_deg=3, p_back=0.05, f_fwd=0.6,
         else:
             cfg = [(1.0, kind)]
         chans.append(Channel(x, y, O, tfix, float(rng.uniform(2, 20)), cfg))
+    frng = np.random.default_rng(flow_seed) if (p_write or p_repl) else None
+    if p_repl:
+        stores = layer_nodes[-1]
+        for v in stores:
+            if frng.random() < p_repl and len(stores) > 1:
+                r = int(frng.choice([u for u in stores if u != v]))
+                if (v, r) not in set(edges):
+                    edges.append((v, r))
+                    kind = kinds[frng.choice(4, p=mix)]
+                    cfg = ([(float(frng.uniform(0.05, 0.5)), "classical")] if kind == "mixed" else [(1.0, kind)])
+                    if kind == "mixed":
+                        cfg.append((1 - cfg[0][0], "hybrid"))
+                    chans.append(Channel(v, r, float(frng.choice([0.1, 0.2])), float(frng.integers(1, 4)),
+                                         float(frng.uniform(2, 20)), cfg))
     out = [[] for _ in range(N)]
     for j, (x, _) in enumerate(edges):
         out[x].append(j)
@@ -125,6 +149,29 @@ def gen_estate(rng, n=200, layers=5, out_deg=3, p_back=0.05, f_fwd=0.6,
         dc.inferred = E.reachable_channels(N, edges, o)
         assert set(dc.labeled) <= set(dc.inferred)
         classes.append(dc)
+    if p_write:
+        into = [[] for _ in range(N)]          # channels whose caller (head) is a node
+        for j, (_, y) in enumerate(edges):
+            into[y].append(j)
+        for o in layer_nodes[0] + layer_nodes[1]:
+            if frng.random() >= p_write or not into[o]:
+                continue
+            dc = DataClass(o, float(frng.uniform(0.1, 1.0)), float(frng.choice([2, 5, 8, 15, 25])), kind="write")
+            holders, st, lab = {o}, [o], set()
+            first = int(frng.choice(into[o]))
+            while st:
+                a = st.pop()
+                for j in into[a]:
+                    if frng.random() < f_fwd or j == first:
+                        lab.add(j)
+                        b = edges[j][0]
+                        if b not in holders:
+                            holders.add(b)
+                            st.append(b)
+            dc.labeled = sorted(lab)
+            dc.inferred = E.reachable_channels(N, edges, o, mode="write")   # typed inference
+            assert set(dc.labeled) <= set(dc.inferred)
+            classes.append(dc)
     return N, edges, chans, classes
 
 
@@ -439,8 +486,295 @@ def exp_greedy(args):
     return out
 
 
+# --------------------------------------------------------------------------- new experiments
+EPS = 1e-12
+
+
+def perturb(chans, classes, sigma, rng):
+    """Multiplicative lognormal noise on O, t_fix, H and L (declared values are medians)."""
+    pc = []
+    for c in chans:
+        z = rng.normal(size=3)
+        pc.append(Channel(c.src, c.dst, float(np.clip(c.O * math.exp(sigma * z[0]), 0, 1)),
+                          c.tfix * math.exp(sigma * z[1]), c.H * math.exp(sigma * z[2]), c.configs))
+    pcls = [DataClass(dc.origin, dc.C, dc.L * math.exp(sigma * rng.normal()), dc.labeled, dc.inferred, dc.kind)
+            for dc in classes]
+    return pc, pcls
+
+
+def first_of(g):
+    return int(np.argsort(-g, kind="stable")[0]) if g.max() > EPS else None
+
+
+def exp_uncertainty(args):
+    """Does a Monte Carlo robust first fix recover the true first fix better than the point
+    estimate, when the declared parameters are noisy versions of the true ones?"""
+    seeds = 6 if args.quick else 20
+    D = 20 if args.quick else 60
+    t, w = prior_grid("uniform[5,20]", args.m)
+    res = {}
+    for si, sigma in enumerate((0.1, 0.25, 0.5)):
+        acc = collections.defaultdict(list)
+        for s in range(seeds):
+            rng = np.random.default_rng(6000 + s)
+            N, edges, chans, classes = gen_estate(rng, n=120)
+            true = total_gains(chans, classes, t, w, "worst")
+            tf = first_of(true)
+            if tf is None:
+                continue
+            r2 = np.random.default_rng(7000 + 10 * s + si)
+            dch, dcl = perturb(chans, classes, sigma, r2)
+            pg = total_gains(dch, dcl, t, w, "worst")
+            P1, P3, mean, valid = np.zeros(len(chans)), np.zeros(len(chans)), np.zeros(len(chans)), 0
+            for _ in range(D):
+                g = total_gains(*perturb(dch, dcl, sigma, r2), t, w, "worst")
+                if g.max() <= EPS:
+                    continue
+                valid += 1
+                o = np.argsort(-g, kind="stable")
+                P1[o[0]] += 1
+                P3[[i for i in o[:3] if g[i] > EPS]] += 1
+                mean += g
+            if not valid:
+                continue
+            P1, P3, mean = P1 / valid, P3 / valid, mean / valid
+            robust = max(range(len(chans)), key=lambda i: (P1[i], mean[i], -i))
+            expmean = max(range(len(chans)), key=lambda i: (mean[i], -i))   # §13.9: expected gain
+            point = first_of(pg)
+            r3 = sorted(range(len(chans)), key=lambda i: (-P3[i], -mean[i], i))[:3]
+            p3 = list(np.argsort(-pg, kind="stable")[:3])
+            onehot = np.zeros(len(chans))
+            onehot[tf] = 1
+            acc["hit_point"].append(point == tf)
+            acc["hit_robust"].append(robust == tf)
+            acc["top3_point"].append(tf in p3)
+            acc["top3_robust"].append(tf in r3)
+            acc["regret_point"].append((true[tf] - (true[point] if point is not None else 0)) / true[tf])
+            acc["regret_robust"].append((true[tf] - true[robust]) / true[tf])
+            acc["hit_expected_gain"].append(expmean == tf)
+            acc["regret_expected_gain"].append((true[tf] - true[expmean]) / true[tf])
+            acc["p_true_first"].append(P1[tf])
+            acc["brier_robust"].append(float(((P1 - onehot) ** 2).sum()))
+            acc["brier_point"].append(0.0 if point == tf else 2.0)
+        res[str(sigma)] = {k: round(float(np.mean(v)), 3) for k, v in acc.items()} | {"estates": len(acc["hit_point"])}
+    return {"seeds": seeds, "draws": D, "nodes": 120, "by_sigma": res,
+            "note": "declared = truth with lognormal noise sigma; the analyst samples the same sigma around the "
+                    "declared values. Rules: point = argmax of declared gains; robust = argmax P(top-1); "
+                    "expected_gain = argmax of mean gain over draws (the rule recommended in §13.9)"}
+
+
+def _flow_metrics(chans, dc, idx, t, w, Rl):
+    lab, inf = set(dc.labeled), set(idx)
+    Ri = E.risk(E.class_matrices(chans, dc, sorted(inf), t, "worst")[0], dc.C, w)
+    return (len(lab & inf) / len(inf) if inf else 1.0, len(lab & inf) / len(lab) if lab else 1.0, Ri)
+
+
+def exp_flows(args):
+    """Write-path and replication flows: precision, recall and under-reporting of read-only,
+    typed and bidirectional inference; and partial labeling of high-criticality classes."""
+    seeds = 6 if args.quick else 20
+    t, w = prior_grid("uniform[5,20]", args.m)
+    out = {"seeds": seeds, "nodes": 120, "p_write": 0.3, "p_repl": 0.2, "inference": [], "partial_labels": []}
+    for f in (0.5, 0.75, 1.0):
+        acc = collections.defaultdict(lambda: collections.defaultdict(list))
+        plab = collections.defaultdict(lambda: collections.defaultdict(list))
+        for s in range(seeds):
+            rng = np.random.default_rng(8000 + s)
+            N, edges, chans, classes = gen_estate(rng, n=120, f_fwd=f, p_write=0.3, p_repl=0.2, flow_seed=9000 + s)
+            Rlab = []
+            for dc in classes:
+                Rl = E.risk(E.class_matrices(chans, dc, dc.labeled, t, "worst")[0], dc.C, w)
+                Rlab.append(Rl)
+                for mode in ("read", "typed", "both"):
+                    idx = dc.inferred if mode == "typed" else E.reachable_channels(N, edges, dc.origin, mode)
+                    pr, rc, Ri = _flow_metrics(chans, dc, idx, t, w, Rl)
+                    a = acc[(dc.kind, mode)]
+                    a["precision"].append(pr)
+                    a["recall"].append(rc)
+                    if Rl > EPS:
+                        a["ratio"].append(Ri / Rl)
+                        a["under"].append(Ri < Rl * (1 - 1e-9))
+            # partial labels: labeled flows for a fraction of classes, typed inference for the rest
+            base = total_gains(chans, classes, t, w, "worst")
+            for order in ("criticality", "random"):
+                ranked = (sorted(range(len(classes)), key=lambda i: -classes[i].C) if order == "criticality"
+                          else list(np.random.default_rng(9500 + s).permutation(len(classes))))
+                for rho in (0.0, 0.1, 0.25, 0.5, 1.0):
+                    k = int(math.ceil(rho * len(classes)))
+                    lab_set = set(ranked[:k])
+                    used, tot_used = [], 0.0
+                    for i, dc in enumerate(classes):
+                        dc.used = dc.labeled if i in lab_set else dc.inferred
+                        tot_used += E.risk(E.class_matrices(chans, dc, dc.used, t, "worst")[0], dc.C, w)
+                    g = total_gains(chans, classes, t, w, "worst", mode="used")
+                    m = rank_metrics(base, g)
+                    b = plab[(order, rho)]
+                    b["overstatement"].append(tot_used / sum(Rlab) if sum(Rlab) > EPS else 1.0)
+                    if m:
+                        b["top1"].append(m[0])
+                        b["wtau"].append(m[2])
+        for (kind, mode), a in sorted(acc.items()):
+            out["inference"].append({"f_fwd": f, "kind": kind, "mode": mode, "classes": len(a["precision"]),
+                                     "precision_median": round(q(a["precision"], 50), 3),
+                                     "recall_median": round(q(a["recall"], 50), 3),
+                                     "recall_min": round(min(a["recall"]), 3),
+                                     "underreport_rate": round(float(np.mean(a["under"])), 3) if a["under"] else 0.0,
+                                     "risk_ratio_median": round(q(a["ratio"], 50), 3) if a["ratio"] else None})
+        for (order, rho), b in sorted(plab.items()):
+            out["partial_labels"].append({"f_fwd": f, "order": order, "labeled_fraction": rho,
+                                          "overstatement_median": round(q(b["overstatement"], 50), 3),
+                                          "same_first_fix": round(float(np.mean(b["top1"])), 3) if b["top1"] else None,
+                                          "wtau_median": round(q(b["wtau"], 50), 3) if b["wtau"] else None})
+    return out
+
+
+def _greedy_fn(gain, n, budget, tie):
+    chosen = []
+    for _ in range(budget):
+        base, best, bj = gain(chosen), -1.0, None
+        for j in sorted([j for j in range(n) if j not in chosen], key=lambda j: (-tie[j], j)):
+            v = gain(chosen + [j]) - base
+            if v > best + 1e-12:
+                best, bj = v, j
+        chosen.append(bj)
+    return chosen
+
+
+def _grouped_fn(gain, n, budget, tie, groups):
+    cands = [[j] for j in range(n)] + [G for G in groups if len(G) > 1]
+    chosen = []
+    while len(chosen) < budget:
+        base, best, bc = gain(chosen), -1.0, None
+        for G in sorted(cands, key=lambda G: (-sum(tie[j] for j in G), G)):
+            new = [j for j in G if j not in chosen]
+            if not new or len(chosen) + len(new) > budget:
+                continue
+            v = (gain(chosen + new) - base) / len(new)
+            if v > best + 1e-12:
+                best, bc = v, new
+        chosen += bc
+    return chosen
+
+
+def _local_search(gain, n, chosen, max_iter=50):
+    """1-swap local search: replace one chosen channel by an unchosen one while that helps."""
+    cur, val = list(chosen), gain(chosen)
+    for _ in range(max_iter):
+        improved = False
+        for i in range(len(cur)):
+            for j in range(n):
+                if j in cur:
+                    continue
+                cand = cur[:i] + [j] + cur[i + 1:]
+                v = gain(cand)
+                if v > val + 1e-12:
+                    cur, val, improved = cand, v, True
+                    break
+            if improved:
+                break
+        if not improved:
+            return cur
+    return cur
+
+
+def exp_remediation(args):
+    """Complementarity, local search, noisy-OR vs max aggregation, and cost-aware selection
+    with the remove-classical-fallback action, on small estates with exhaustive optimum."""
+    n_inst = 25 if args.quick else 100
+    t, w = prior_grid("uniform[5,20]", 101)
+    rng = np.random.default_rng(10)
+    acc = collections.defaultdict(list)
+    made = 0
+    while made < n_inst:
+        N, edges, chans, classes = gen_estate(rng, n=14, layers=4, out_deg=2, p_back=0.1)
+        if not (8 <= len(chans) <= 40):
+            continue
+        made += 1
+        n = len(chans)
+        for agg, reading in (("max", "worst"), ("max", "share"), ("noisyor", "worst")):
+            parts = []
+            for dc in classes:
+                if not dc.labeled:
+                    continue
+                if agg == "max":
+                    Em, E0 = E.class_matrices(chans, dc, dc.labeled, t, reading)
+                    parts.append((dc.labeled, Em, E0, None, dc.C))
+                else:
+                    W, W0, O = E.class_windows(chans, dc, dc.labeled, t, reading)
+                    parts.append((dc.labeled, W, W0, O, dc.C))
+
+            def gain(S, parts=parts, agg=agg):
+                S, tot = set(S), 0.0
+                for idx, A, A0, O, C in parts:
+                    rows = [r for r, j in enumerate(idx) if j in S]
+                    tot += (E.fix_set_gain(A, A0, C, w, rows) if agg == "max"
+                            else E.noisyor_fix_set_gain(A, A0, O, C, w, rows))
+                return tot
+            tie = np.zeros(n)
+            groups = []
+            for idx, A, A0, O, C in parts:
+                rem = (A - A0) @ w if agg == "max" else ((A - A0) @ w) * O
+                np.add.at(tie, idx, C * rem)
+                G = sorted({j for r, j in enumerate(idx) if rem[r] > 1e-12})
+                if G:
+                    groups.append(G)
+            key = f"{agg}/{reading}"
+            single = [gain([j]) for j in range(n)]
+            gaps = [gain([i, j]) - single[i] - single[j] for i in range(n) for j in range(i + 1, n)]
+            acc[f"{key}/complementary_instance"].append(max(gaps) > 1e-9)
+            acc[f"{key}/max_gap"].append(max(gaps))
+            for k in (2, 3):
+                opt = max(gain(list(S)) for S in itertools.combinations(range(n), k))
+                if opt <= 1e-12:
+                    continue
+                g1 = _greedy_fn(gain, n, k, tie)
+                g2 = _grouped_fn(gain, n, k, tie, groups)
+                g3 = _local_search(gain, n, g2)
+                for name, S in (("greedy", g1), ("grouped", g2), ("grouped+local_search", g3)):
+                    acc[f"{key}/k={k}/{name}"].append(gain(S) / opt)
+            if key == "max/worst":
+                # cost-aware selection: migrate (cost 1) or, on mixed channels, remove the classical
+                # fallback (cost = classical share; same risk effect as migrating now)
+                cost = {("migrate", j): 1.0 for j in range(n)}
+                for j, c in enumerate(chans):
+                    qc = sum(qq for qq, kd in c.configs if kd != "hybrid")
+                    if 0 < qc < 1:
+                        cost[("fallback", j)] = qc
+                for budget in (1.0, 2.0):
+                    def pick(allowed):
+                        chosen, spent = set(), 0.0
+                        while True:
+                            base, best, ba = gain(chosen), 0.0, None
+                            for (a, j), cst in sorted(allowed.items(), key=lambda x: (x[0][1], x[0][0])):
+                                if j in chosen or spent + cst > budget + 1e-12:
+                                    continue
+                                v = (gain(chosen | {j}) - base) / cst
+                                if v > best + 1e-12:
+                                    best, ba = v, (a, j, cst)
+                            if ba is None:
+                                return gain(chosen)
+                            chosen.add(ba[1])
+                            spent += ba[2]
+                    mig = pick({k_: v for k_, v in cost.items() if k_[0] == "migrate"})
+                    both = pick(cost)
+                    acc[f"cost_aware/budget={budget}/gain_migrate_only"].append(mig)
+                    acc[f"cost_aware/budget={budget}/gain_with_fallback"].append(both)
+                    acc[f"cost_aware/budget={budget}/improved"].append(both > mig + 1e-12)
+    out = {"instances": n_inst, "notes": "ratios are achieved / optimal risk reduction; complementary_instance = "
+           "some pair (e, f) has g(e, f) > g(e) + g(f), which violates submodularity on pairs"}
+    for k, v in sorted(acc.items()):
+        a = np.array(v, dtype=float)
+        if k.endswith(("greedy", "grouped", "local_search")):
+            out[k] = {"gap_fraction": round(float((a < 1 - 1e-9).mean()), 3), "worst_ratio": round(float(a.min()), 3),
+                      "mean_ratio": round(float(a.mean()), 3), "n": len(a)}
+        else:
+            out[k] = round(float(a.mean()), 3)
+    return out
+
+
 EXPS = {"validate": exp_validate, "fixpoint": exp_fixpoint, "scaling": exp_scaling,
-        "inference": exp_inference, "stability": exp_stability, "greedy": exp_greedy}
+        "inference": exp_inference, "stability": exp_stability, "greedy": exp_greedy,
+        "uncertainty": exp_uncertainty, "flows": exp_flows, "remediation": exp_remediation}
 
 
 def main():

@@ -18,6 +18,10 @@ import json
 import math
 import os
 import re
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import analysis  # noqa: E402  (stdlib-only extra analyses)
 
 INF = math.inf
 HOSTS = ["gw", "lb", "appa", "appb", "data"]
@@ -402,7 +406,7 @@ def ssh_plane(gt, probe, run_dir, ips, key_samples):
 
 
 # --------------------------------------------------------------------------- CBOM
-def cbom(gt, probe, obs):
+def cbom(gt, probe, obs, cov=None):
     comps, seen = [], set()
     def add(ref, comp):
         if ref not in seen:
@@ -431,9 +435,16 @@ def cbom(gt, probe, obs):
                 "notValidAfter": cert.get("not_after")}},
             "properties": [{"name": "dytallix:key-algorithm", "value": str(cert.get("key"))},
                            {"name": "dytallix:signature-algorithm", "value": str(cert.get("sig"))}]})
+    meta = {"component": {"type": "application", "name": "pqc-topology-testbed"}}
+    if cov:
+        meta["properties"] = [
+            {"name": "dytallix:coverage:classesWithLabels", "value": str(cov["classes_with_labels"])},
+            {"name": "dytallix:coverage:labeledFractionOfInferred", "value": str(cov["labeled_fraction_of_inferred"])},
+            {"name": "dytallix:coverage:channelsWithNegotiationData", "value": str(cov["channels_with_negotiation_data"])},
+            {"name": "dytallix:coverage:unknownChannels", "value": str(cov["unknown_channels"])},
+            {"name": "dytallix:coverage:residualUnknownRisk", "value": str(cov["residual_unknown_risk"])}]
     return {"bomFormat": "CycloneDX", "specVersion": "1.6", "version": 1,
-            "metadata": {"component": {"type": "application", "name": "pqc-topology-testbed"}},
-            "components": comps}
+            "metadata": meta, "components": comps}
 
 
 # --------------------------------------------------------------------------- main
@@ -528,6 +539,21 @@ def main():
     trust = tnfl(gt, probe, key_samples)
     ssh = ssh_plane(gt, probe, a.run_dir, ips, key_samples)
 
+    # dual reading: does the first fix depend on the reading?
+    first = {r: (max(rem, key=lambda x: (x[col], -edges.index(tuple(x["channel"].split("->", 1)))))["channel"]
+                 if rem and max(x[col] for x in rem) > 0 else None)
+             for r, col in (("worst", "risk_reduction"), ("share", "risk_reduction_share"))}
+    readings = {"worst_first_fix": first["worst"], "share_first_fix": first["share"],
+                "diverge": first["worst"] != first["share"]}
+
+    def is_hybrid(cfg):
+        return kex_break_time(*cfg, 1.0) == INF
+    actions = analysis.remediation_actions(gt, obs, edges, key_samples, risk_for, is_hybrid, rem)
+    comp = analysis.complementarity(gt, obs, edges, key_samples, risk_for) if len(edges) <= 15 else None
+    cov = analysis.coverage(gt, obs, edges, key_samples, risk_for, reachable_channels)
+    unc = analysis.uncertainty_analysis(gt, obs, edges, risk_for)
+    priors = analysis.prior_sensitivity(gt, obs, risk_for)
+
     # sensitivity to a finite break time of the post-quantum components (assumption A6)
     pq = []
     for tpq in gt["scenarios"].get("T_PQ_points", []):
@@ -544,11 +570,13 @@ def main():
     score = {"discovery": disc, "supported_vs_negotiated": gap, "passive_agreement": agree,
              "hndl": hndl, "remediation": rem, "tnfl": trust, "pq_sensitivity": pq, "ssh_plane": ssh,
              "scenario_for_rankings": key_label,
-             "ssh": probe.get("ssh", [])}
+             "ssh": probe.get("ssh", []),
+             "readings": readings, "actions": actions, "complementarity": comp, "coverage": cov,
+             "uncertainty": unc, "prior_sensitivity": priors}
     with open(os.path.join(a.run_dir, "score.json"), "w") as f:
         json.dump(score, f, indent=2, default=str)
     with open(os.path.join(a.run_dir, "cbom.json"), "w") as f:
-        json.dump(cbom(gt, probe, obs), f, indent=2)
+        json.dump(cbom(gt, probe, obs, cov), f, indent=2)
     write_report(a.run_dir, score)
     print(open(os.path.join(a.run_dir, "report.md")).read())
 
@@ -594,6 +622,55 @@ def write_report(run_dir, s):
     L += [f"## Remediation ranking ({s['scenario_for_rankings']}, fix one channel now)", "",
           "| Channel | Risk reduction (worst case) | Risk reduction (share-weighted) |", "|---|---|---|"]
     L += [f"| {r['channel']} | {r['risk_reduction']} | {r['risk_reduction_share']} |" for r in s["remediation"]]
+    if s.get("readings"):
+        rd = s["readings"]
+        L += ["", (f"**Readings diverge:** the first fix is {rd['worst_first_fix']} under the worst-case reading "
+                   f"and {rd['share_first_fix']} under the share-weighted reading." if rd["diverge"] else
+                   f"The worst-case and share-weighted readings agree on the first fix ({rd['worst_first_fix']}).")]
+    if s.get("actions"):
+        L += ["", "## Remediation actions (gain per cost, worst-case reading)", "",
+              "Removing a channel's classical fallback stops its classical sessions now. Recorded classical "
+              "traffic stays sunk, so its risk effect equals migrating the channel now (the remediable part, "
+              "Proposition 7(f)); it differs in cost, which here is the refused legacy share.", "",
+              "| Action | Channel | Cost | Gain (worst) | Gain (share) | Gain / cost |", "|---|---|---|---|---|---|"]
+        L += [f"| {x['action']} | {x['channel']} | {x['cost']} | {x['gain_worst']} | {x['gain_share']} | "
+              f"{x['gain_per_cost_worst']} |" for x in s["actions"] if x["gain_worst"] > 0 or x["gain_share"] > 0]
+    if s.get("complementarity"):
+        L += ["", "## Complementarity (gap = g(e, f) - g(e) - g(f); positive means fixing one raises the other's value)", ""]
+        for r, v in s["complementarity"].items():
+            pairs = ", ".join(f"{p['pair'][0]} + {p['pair'][1]}: {p['gap']}" for p in v["complementary_pairs"][:5])
+            L.append(f"- {r}: max gap {v['max_gap']}" + (f"; complementary pairs: {pairs}" if pairs else ""))
+    if s.get("uncertainty"):
+        u = s["uncertainty"]
+        L += ["", f"## Uncertainty ({u['draws']} draws, T_Q ~ {u['prior']}, {u['grid_points']}-point grid)", "",
+              "The ranking is recomputed for each draw of the uncertain parameters (C, L, O, t_fix, H as "
+              "specified in groundtruth.json). P(top-1) and P(top-k) are over draws in which some channel has "
+              f"a positive gain. {u['note'].capitalize()}. Rule: {u['rule']}.", ""]
+        for r, v in u["readings"].items():
+            L += [f"### {r} reading: robust first fix {v['robust_first_fix']} (point estimate: {v['point_first_fix']}; "
+                  f"draws with no positive gain: {v['draws_with_zero_gain']})", "",
+                  f"| Channel | Point gain | Mean gain | 90% interval | P(top-1) | P(top-{u['k']}) |", "|---|---|---|---|---|---|"]
+            L += [f"| {c['channel']} | {c['point_gain']} | {c['mean_gain']} | {c['ci90'][0]}–{c['ci90'][1]} | "
+                  f"{c['p_top1']} | {c['p_topk']} |" for c in v["channels"] if c["p_topk"] > 0 or c["mean_gain"] > 0]
+            L.append("")
+        L.append("**Robust first fixes diverge between readings.**" if u["readings_diverge"]
+                 else "Robust first fixes agree between readings.")
+    if s.get("coverage"):
+        c = s["coverage"]
+        L += ["", "## Coverage", "",
+              f"- Data classes with labeled flows: {c['classes_with_labels']:.0%}",
+              f"- Labeled share of inferred flow channels: {c['labeled_fraction_of_inferred']:.0%}",
+              f"- Flow channels with negotiation telemetry: {c['channels_with_negotiation_data']:.0%}",
+              f"- Channels with an unattributed caller: {c['unknown_channels']}; residual risk if they carried "
+              f"the classes of their server: {c['residual_unknown_risk']}"]
+    if s.get("prior_sensitivity"):
+        rows = s["prior_sensitivity"]
+        cls = list(rows[0]["hndl"])
+        L += ["", "## CRQC-arrival prior x T_PQ sensitivity (propagated risk)", "",
+              "| Prior | T_PQ | " + " | ".join(f"{d} worst | {d} share" for d in cls) + " |",
+              "|---|---|" + "---|---|" * len(cls)]
+        L += [f"| {r['prior']} | {r['T_PQ']} | " + " | ".join(f"{r['hndl'][d]['worst']} | {r['hndl'][d]['share']}" for d in cls)
+              + " |" for r in rows]
     L += ["", f"## TNFL ({s['scenario_for_rankings']})", "", "| Key | Acceptance horizon τ | Forgery window S | Quantum-vulnerable |",
           "|---|---|---|---|"]
     for k, v in sorted(s["tnfl"]["keys"].items()):

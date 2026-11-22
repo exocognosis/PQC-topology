@@ -50,6 +50,7 @@ class DataClass:
     L: float
     labeled: list = field(default_factory=list)   # channel indices
     inferred: list = field(default_factory=list)
+    kind: str = "read"                              # "read": moves server -> caller; "write": caller -> server
 
 
 def break_times(kind, t, tpq=INF):
@@ -204,15 +205,60 @@ def propagate_brute(n, edges, omega):
     return X
 
 
-def reachable_channels(n, edges, origin):
-    adj = [[] for _ in range(n)]
-    for j, (x, y) in enumerate(edges):
-        adj[x].append((y, j))
+def reachable_channels(n, edges, origin, mode="read"):
+    """Inferred flow of a class from its origin (channels e = (x -> y), oriented on the read path).
+
+    mode "read":  data moves x -> y; channels whose tail x is reachable from the origin (§6.4).
+    mode "write": data moves y -> x (callers send their own data to services); channels whose
+                  head y is reachable from the origin in the reversed graph.
+    mode "both":  data may move either way; the undirected closure (the degenerate case of §6.4).
+    """
+    fwd, rev = [[] for _ in range(n)], [[] for _ in range(n)]
+    for x, y in edges:
+        fwd[x].append(y)
+        rev[y].append(x)
+    nbrs = {"read": lambda a: fwd[a], "write": lambda a: rev[a], "both": lambda a: fwd[a] + rev[a]}[mode]
     seen, st = {origin}, [origin]
     while st:
         a = st.pop()
-        for b, _ in adj[a]:
+        for b in nbrs(a):
             if b not in seen:
                 seen.add(b)
                 st.append(b)
-    return [j for j, (x, _) in enumerate(edges) if x in seen]
+    if mode == "read":
+        return [j for j, (x, _) in enumerate(edges) if x in seen]
+    if mode == "write":
+        return [j for j, (_, y) in enumerate(edges) if y in seen]
+    return [j for j, (x, y) in enumerate(edges) if x in seen or y in seen]
+
+
+# --------------------------------------------------------------------------- noisy-OR (§6.2 variant)
+def class_windows(chans, dc, idx, t, reading, tpq=INF):
+    """Windows W and sunk windows W0 without observability, plus the O vector."""
+    if not idx:
+        z = np.zeros((0, len(t)))
+        return z, z, np.zeros(0)
+    one = []
+    for i in idx:
+        c = chans[i]
+        cw = Channel(c.src, c.dst, 1.0, c.tfix, c.H, c.configs)
+        one.append(cw)
+    W = np.array([channel_exposure(c, dc.L, t, reading, tpq=tpq) for c in one])
+    W0 = np.array([channel_exposure(c, dc.L, t, reading, tfix=0.0, tpq=tpq) for c in one])
+    return W, W0, np.array([chans[i].O for i in idx])
+
+
+def noisyor_value(W, O):
+    """Per realization: (1 - prod_{e: W_e > 0} (1 - O_e)) * max_e W_e."""
+    if W.shape[0] == 0:
+        return np.zeros(W.shape[1])
+    miss = np.prod(np.where(W > 0, (1.0 - O)[:, None], 1.0), axis=0)
+    return (1.0 - miss) * W.max(axis=0)
+
+
+def noisyor_fix_set_gain(W, W0, O, C, w, rows):
+    if W.shape[0] == 0 or not rows:
+        return 0.0
+    W2 = W.copy()
+    W2[list(rows)] = W0[list(rows)]
+    return C * float(np.dot(w, noisyor_value(W, O) - noisyor_value(W2, O)))
