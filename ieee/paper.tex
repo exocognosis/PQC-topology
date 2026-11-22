@@ -34,7 +34,7 @@ post-quantum migration, cryptographic inventory, CBOM, Mosca inequality, attack 
 
 \section{Introduction}\label{sec:1}
 
-A cryptographically relevant quantum computer (CRQC) would break the public-key primitives that protect most key establishment and authentication today. NIST has standardized replacements: ML-KEM (FIPS 203), ML-DSA (FIPS 204), and SLH-DSA (FIPS 205)~\cite{nist-fips203-205}, alongside the stateful hash-based signatures LMS and XMSS (SP 800-208~\cite{nist-sp800-208}). Migration timelines are now explicit: NIST IR 8547~\cite{nist-ir8547} (initial public draft) proposes deprecating quantum-vulnerable public-key algorithms at the 112-bit security level after 2030 and disallowing them after 2035, and NSA's CNSA 2.0~\cite{nsa-cnsa2} sets earlier dates for national security systems. Two threats make the problem urgent before a CRQC exists.
+A cryptographically relevant quantum computer (CRQC) would break the public-key primitives that protect most key establishment and authentication today. NIST has standardized replacements: ML-KEM (FIPS 203), ML-DSA (FIPS 204), and SLH-DSA (FIPS 205)~\cite{nist-fips203-205}, alongside the stateful hash-based signatures LMS and XMSS (SP 800-208~\cite{nist-sp800-208}). Migration timelines are now explicit: NIST IR 8547~\cite{nist-ir8547} deprecates all quantum-vulnerable public-key algorithms after 2030 and disallows them after 2035, with earlier deadlines for high-sensitivity federal systems, and NSA's CNSA 2.0~\cite{nsa-cnsa2} sets earlier dates for national security systems. Two threats make the problem urgent before a CRQC exists.
 
 \begin{itemize}
 \item \textbf{Harvest now, decrypt later (HNDL).} An adversary records ciphertext today and decrypts it once a CRQC is available. This applies to traffic protected by RSA key transport and equally to traffic protected by ephemeral (EC)DHE: forward secrecy protects against later compromise of long-term keys, but Shor's algorithm recovers each ephemeral shared secret directly from the recorded handshake. Forward secrecy therefore gives no protection against HNDL.
@@ -497,7 +497,7 @@ The risk sits entirely in the anchor, which cannot be migrated in the field. Rot
 
 \subsection{From quantum day to arbitrary sunsets}\label{sec:11.1}
 
-Nothing in Sections~\ref{sec:5}--\ref{sec:8} depends on the cause of a break. Replacing $\Tq$ with per-algorithm deadlines $T_s(c)$, whether regulatory (NIST IR 8547's 2030 deprecation and 2035 disallowance, CNSA 2.0 dates) or cryptanalytic, turns the framework into a general crypto-agility model. Classical deprecations such as SHA-1 or TLS 1.0 are the case $T_s \le 0$. Each primitive then carries its own break-time distribution, with dependence between them (all Shor-vulnerable primitives fall together; regulatory deadlines are deterministic).
+Nothing in Sections~\ref{sec:5}--\ref{sec:8} depends on the cause of a break. Replacing $\Tq$ with per-algorithm deadlines $T_s(c)$, whether regulatory (NIST IR 8547's deprecation after 2030 and disallowance after 2035, CNSA 2.0 dates) or cryptanalytic, turns the framework into a general crypto-agility model. Classical deprecations such as SHA-1 or TLS 1.0 are the case $T_s \le 0$. Each primitive then carries its own break-time distribution, with dependence between them (all Shor-vulnerable primitives fall together; regulatory deadlines are deterministic).
 
 \subsection{Temporal graphs}\label{sec:11.2}
 
@@ -879,7 +879,7 @@ Test vectors & \texttt{vec\_\allowbreak{}*} (10 theorems) & Window values, inclu
 \begin{thebibliography}{99}
 \bibitem{nist-fips203-205} National Institute of Standards and Technology. (2024). \emph{FIPS 203, 204, 205}: ML-KEM, ML-DSA, SLH-DSA.
 \bibitem{nist-sp800-208} National Institute of Standards and Technology. (2020). \emph{SP 800-208: Recommendation for Stateful Hash-Based Signature Schemes}.
-\bibitem{nist-ir8547} National Institute of Standards and Technology. (2024). \emph{IR 8547 (Initial Public Draft): Transition to Post-Quantum Cryptography Standards}.
+\bibitem{nist-ir8547} National Institute of Standards and Technology. (2026). \emph{IR 8547: Transition to Post-Quantum Cryptography Standards} (D. Moody, R. Perlner, A. Regenscheid, A. Robinson \& D. Cooper). https://doi.org/10.6028/NIST.IR.8547
 \bibitem{nsa-cnsa2} National Security Agency. (2022). \emph{Commercial National Security Algorithm Suite 2.0}.
 \bibitem{loebenberger2024} Loebenberger, D., Gazdag, S.-L., Herzinger, D., Hirsch, E., Näther, C., \& Steghöfer, J.-P. (2024). On the formalization of cryptographic migration. arXiv:2408.05997 (revised 2025).
 \bibitem{cyclonedx16} CycloneDX. (2024). \emph{CycloneDX Specification v1.6}, including the Cryptographic Bill of Materials. OWASP Foundation. Later versions extend it.

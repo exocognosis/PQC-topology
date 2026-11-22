@@ -83,7 +83,7 @@ mjx-container[display="true"]{margin:.6rem 0 !important}
   #appD .tbl{break-inside:auto}
   .tbl,figure .wrap,.math{overflow:visible}
   svg.topo{min-width:0}
-  nav.toc,#appC{display:none}
+  nav.toc{display:none}
   a{color:inherit;text-decoration:none}
 }
 </style>
@@ -126,7 +126,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],macr
 
 <section id="s1">
 <h2>1. Introduction</h2>
-<p>A cryptographically relevant quantum computer (CRQC) would break the public-key primitives that protect most key establishment and authentication today. NIST has standardized replacements: ML-KEM (FIPS 203), ML-DSA (FIPS 204), and SLH-DSA (FIPS 205), alongside the stateful hash-based signatures LMS and XMSS (SP 800-208). Migration timelines are now explicit: NIST IR 8547 (initial public draft) proposes deprecating quantum-vulnerable public-key algorithms at the 112-bit security level after 2030 and disallowing them after 2035, and NSA's CNSA 2.0 sets earlier dates for national security systems. Two threats make the problem urgent before a CRQC exists.</p>
+<p>A cryptographically relevant quantum computer (CRQC) would break the public-key primitives that protect most key establishment and authentication today. NIST has standardized replacements: ML-KEM (FIPS 203), ML-DSA (FIPS 204), and SLH-DSA (FIPS 205), alongside the stateful hash-based signatures LMS and XMSS (SP 800-208). Migration timelines are now explicit: NIST IR 8547 deprecates all quantum-vulnerable public-key algorithms after 2030 and disallows them after 2035, with earlier deadlines for high-sensitivity federal systems, and NSA's CNSA 2.0 sets earlier dates for national security systems. Two threats make the problem urgent before a CRQC exists.</p>
 <ul>
   <li><strong>Harvest now, decrypt later (HNDL).</strong> An adversary records ciphertext today and decrypts it once a CRQC is available. This applies to traffic protected by RSA key transport and equally to traffic protected by ephemeral (EC)DHE: forward secrecy protects against later compromise of long-term keys, but Shor's algorithm recovers each ephemeral shared secret directly from the recorded handshake. Forward secrecy therefore gives no protection against HNDL.</li>
   <li><strong>Trust now, forge later (TNFL).</strong> Once a CRQC exists, signatures under quantum-vulnerable keys can be forged. Live authentication sessions that have already ended cannot be retroactively spoofed, but any key that verifiers still accept on or after that date can be used to impersonate endpoints, issue rogue certificates, or sign malicious firmware. Long-lived signed artifacts (archives, contracts, code, ledger entries) also lose non-repudiation, because a forger can produce signatures indistinguishable from historical ones.</li>
@@ -477,7 +477,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],macr
 <section id="s11">
 <h2>11. Generalization and adjacent domains</h2>
 <h3>11.1 From quantum day to arbitrary sunsets</h3>
-<p>Nothing in §§5–8 depends on the cause of a break. Replacing \(\Tq\) with per-algorithm deadlines \(T_s(c)\), whether regulatory (NIST IR 8547's 2030 deprecation and 2035 disallowance, CNSA 2.0 dates) or cryptanalytic, turns the framework into a general crypto-agility model. Classical deprecations such as SHA-1 or TLS 1.0 are the case \(T_s \le 0\). Each primitive then carries its own break-time distribution, with dependence between them (all Shor-vulnerable primitives fall together; regulatory deadlines are deterministic).</p>
+<p>Nothing in §§5–8 depends on the cause of a break. Replacing \(\Tq\) with per-algorithm deadlines \(T_s(c)\), whether regulatory (NIST IR 8547's deprecation after 2030 and disallowance after 2035, CNSA 2.0 dates) or cryptanalytic, turns the framework into a general crypto-agility model. Classical deprecations such as SHA-1 or TLS 1.0 are the case \(T_s \le 0\). Each primitive then carries its own break-time distribution, with dependence between them (all Shor-vulnerable primitives fall together; regulatory deadlines are deterministic).</p>
 <h3>11.2 Temporal graphs</h3>
 <p>A migration plan changes the graph over time. Representing configurations as a temporal graph, where each channel's stack is a piecewise-constant function of time, lets the exposure window be computed piecewise and makes "what-if" comparison of migration plans direct.</p>
 <h3>11.3 Adjacent domains</h3>
@@ -739,7 +739,7 @@ window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],macr
   <li>National Institute of Standards and Technology, NCCoE. <em>SP 1800-38: Migration to Post-Quantum Cryptography</em>.</li>
   <li>National Institute of Standards and Technology. (2020). <em>SP 800-208: Recommendation for Stateful Hash-Based Signature Schemes</em>.</li>
   <li>National Institute of Standards and Technology. (2024). <em>FIPS 203, 204, 205</em>: ML-KEM, ML-DSA, SLH-DSA.</li>
-  <li>National Institute of Standards and Technology. (2024). <em>IR 8547 (Initial Public Draft): Transition to Post-Quantum Cryptography Standards</em>.</li>
+  <li>National Institute of Standards and Technology. (2026). <em>IR 8547: Transition to Post-Quantum Cryptography Standards</em> (D. Moody, R. Perlner, A. Regenscheid, A. Robinson &amp; D. Cooper). https://doi.org/10.6028/NIST.IR.8547</li>
   <li>National Security Agency. (2022). <em>Commercial National Security Algorithm Suite 2.0</em>.</li>
   <li>Ou, X., Govindavajhala, S., &amp; Appel, A. W. (2005). MulVAL: A logic-based network security analyzer. <em>USENIX Security 2005</em>.</li>
   <li>Poolsappasit, N., Dewri, R., &amp; Ray, I. (2012). Dynamic security risk management using Bayesian attack graphs. <em>IEEE TDSC</em>, 9(1).</li>
@@ -818,33 +818,4 @@ trust graph with vertex values S(k).</pre>
 </table></div>
 </section>
 
-<section id="appC">
-<div class="note">
-<h3>Editor's note: changes from the previous draft (remove before submission)</h3>
-<ul>
-  <li>§7 example sensitivity: \(\Tq = 15\) gives \(R = 2.0\), not 7.0.</li>
-  <li>Classification now enters every score through break times; the local score no longer assigns risk to quantum-safe assets.</li>
-  <li>Propagated risk is proved to dominate local risk (Prop. 1).</li>
-  <li>Primitives moved to channel bundles and trust-graph keys, so the model and example use the same types; \(L\) belongs to data classes.</li>
-  <li>Bulk cipher and key establishment are separated; "AES-256 (safe)" is replaced with full bundles.</li>
-  <li>Forward-secrecy text corrected: forward secrecy does not protect against HNDL. The sunk/remediable split replaces it.</li>
-  <li>TNFL uses an acceptance horizon (minimum, not sum), propagates down the trust graph, and covers long-lived signatures.</li>
-  <li>Cycle handling: the infinite-loop claim was removed; fixpoint and condensation equivalence are proved, and the linear bound is stated per lifespan tier.</li>
-  <li>Exposure attaches to observable channels; migration time attaches to the channel being fixed, not the asset.</li>
-  <li>Classification fixes: 3DES moved to classically broken; Grover margin is a policy choice; Shor speedup described as super-polynomial; hashes and LMS/XMSS added; downgrade scoped to active/TNFL.</li>
-  <li>Added related work, threat model and assumptions, remediation complexity, discovery limits of active probing, CBOM property mapping, generalization, extensions, and an evaluation plan. Removed the duplicated §5 paragraph, the uncited weighted-average claim, and unsupported uses of "rigorous."</li>
-  <li>Citations: Mosca dated 2018 (preprint 2015); CBOM attributed to CycloneDX 1.6.</li>
-  <li>Added §2.5 on quantitative and formal PQC migration models, positioned the paper as extending Loebenberger, Gazdag et al. (2024), reframed the HNDL/TNFL split as a refinement, and compared with prior work in §6.1, §6.5 and §8.2. References marked in orange were found through search results only; confirm their titles and authors before submission.</li>
-  <li>Replaced the §13 evaluation plan with results from a local testbed run (120-second window) and a six-server Hetzner Cloud run (15-minute window), including SSH key-exchange discovery (§13.8).</li>
-  <li>Added §6.6 and Proposition 7 (session mixtures, Lean-checked), so that channels negotiating several configurations are scored by measured shares. Non-submodularity is renumbered from Proposition 7 to Proposition 8. §13.4–13.5 report both readings, which reverse the remediation ranking. The abstract, contributions and conclusion are updated to match.</li>
-  <li>Relaxed A6: post-quantum schemes may have a finite or random break time \(T_{\mathrm{PQ}}\). Added Lemma 2 (windows under composition, Lean-checked), Corollary 1 (expected exposure of hybrids, with Fréchet bounds when the two breaks are dependent), and a sensitivity analysis in §13.7. SSH moves to §13.8 and threats to validity to §13.9.</li>
-  <li>Added §13.9 on synthetic topologies: engine validation against the testbed, scaling, inference precision, rank stability under parameter noise and alternative priors, and greedy against optimal selection. §8.2's heuristic is specified as a group-aware greedy. Threats to validity move to §13.10, and the next steps reduce to the production case study.</li>
-  <li>Probe coverage: TLS 1.2 ECDHE groups are now enumerated (with the RFC 8422 certificate-curve correction), and a local run with an SSH plane measures negotiated SSH key exchange from captured KEXINIT messages (§13.2, §13.8). The cloud-run SSH section is now part of §13.8.</li>
-  <li>References checked against the publishers' pages and arXiv. Corrected titles and authors for Ajith et al., Erlemann et al., Grigaliūnas &amp; Brūzgienė, Hasan et al. (now cited as published in <em>IEEE Access</em>) and Loebenberger et al. Added authors and titles for Shaw, Alam and Figueira et al. (SBSeg 2026, not 2025). Descriptions of Loebenberger et al., Erlemann et al., Rufino et al. and Alam were revised to match the abstracts. The claim that Alam separates confidentiality from authentication was not supported by the abstract and was removed. The SBSeg author names were confirmed from the paper's PDF and Crossref, and the <em>Cybersecurity</em> article (Gupta &amp; Mittal, 2026) from its Crossref record; its description was made precise. Tables are renumbered in reading order, and a Declarations section is added.</li>
-  <li><strong>Before submission (author):</strong> add a funding statement if the venue requires one; add any statement on AI assistance that the venue requires; choose the venue and convert to its template; remove this note.</li>
-  <li>Lean now also covers Proposition 4 (fixpoint, least pre-fixpoint, constancy on strongly connected components, condensation recurrence), the expectation forms of Propositions 1–3, Proposition 6 (layer cake), and Corollary 1 (joint form and upper bound): 35 theorems in total, using only the standard axioms.</li>
-  <li>Added ten Lean-proved test vectors (<code>vec_*</code>) and a property-based test suite that checks every formalized statement against the scorer and the synthetic engine (Appendix D).</li>
-</ul>
-</div>
-</section>
 </main>
