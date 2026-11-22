@@ -1,0 +1,19 @@
+{
+  "_comment": "Example estate for examples/estate_risk.py. Replace with your own inventory. Times are in years. Each channel is a server/caller pair; data on the read path moves server -> caller. configs are measured session shares by key exchange: 'classical' (X25519, ECDHE, RSA: broken at T_Q), 'hybrid' (e.g. X25519MLKEM768: broken at max(T_Q, T_PQ)), 'broken' (already broken classically). O = probability an adversary records the channel; t_fix = years until migrated; H = years of traffic already recorded on it.",
+  "crqc_prior": {"kind": "uniform", "low": 5, "high": 20, "points": 201},
+  "T_PQ": "inf",
+  "services": ["internet", "edge", "api", "auth", "orders", "db", "partner"],
+  "channels": [
+    {"server": "edge",   "caller": "internet", "O": 0.9, "t_fix": 0.5, "H": 5, "configs": {"hybrid": 0.73, "classical": 0.27}},
+    {"server": "api",    "caller": "edge",     "O": 0.3, "t_fix": 1.0, "H": 5, "configs": {"classical": 1.0}},
+    {"server": "auth",   "caller": "api",      "O": 0.2, "t_fix": 2.0, "H": 5, "configs": {"classical": 1.0}},
+    {"server": "orders", "caller": "api",      "O": 0.2, "t_fix": 2.0, "H": 5, "configs": {"classical": 1.0}},
+    {"server": "db",     "caller": "orders",   "O": 0.1, "t_fix": 3.0, "H": 5, "configs": {"hybrid": 1.0}},
+    {"server": "orders", "caller": "partner",  "O": 0.3, "t_fix": 4.0, "H": 3, "configs": {"classical": 1.0}}
+  ],
+  "data_classes": [
+    {"name": "customer-records", "origin": "db",   "C": 1.0, "L": 15, "flow": "read"},
+    {"name": "session-tokens",   "origin": "auth", "C": 0.8, "L": 1,  "flow": "read"},
+    {"name": "partner-orders",   "origin": "partner", "C": 0.5, "L": 7, "flow": "write"}
+  ]
+}

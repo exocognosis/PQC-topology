@@ -1,0 +1,16 @@
+name: Model question or counterexample
+description: A definition, proposition or ranking that does not fit a real estate.
+labels: [model]
+body:
+  - type: input
+    id: where
+    attributes:
+      label: Section or result
+      placeholder: "e.g. §6.6, Proposition 7(b)"
+  - type: textarea
+    id: case
+    attributes:
+      label: The case
+      description: The topology, shares and parameters, and what you think the right answer is.
+    validations:
+      required: true
