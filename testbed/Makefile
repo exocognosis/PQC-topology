@@ -42,7 +42,7 @@ test:              ## Property tests linking the Lean theorems to the code; need
 
 lint:
 	shellcheck -x scripts/*.sh tools/*.sh clients/*.sh pki/*.sh images/pqc-nginx/entrypoint.sh
-	python3 -m py_compile tools/probe.py tools/score.py synth/engine.py synth/run.py tests/test_properties.py tests/gen_lean_vectors.py
+	python3 -m py_compile tools/probe.py tools/score.py tools/analysis.py synth/engine.py synth/run.py tests/test_properties.py tests/test_extensions.py tests/gen_lean_vectors.py
 	terraform -chdir=terraform fmt -check
 	docker compose -f local/compose.yaml config -q
 	GW_PUBLIC_IP=192.0.2.1 docker compose -f hetzner/compose.yaml --profile gw --profile lb --profile appa --profile appb --profile data --profile client --profile probe config -q

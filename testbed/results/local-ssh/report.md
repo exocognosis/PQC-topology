@@ -82,6 +82,70 @@
 | appb->appa | 0.0 | 0.0 |
 | data->appa | 0.0 | 0.0 |
 
+**Readings diverge:** the first fix is gw->client under the worst-case reading and lb->gw under the share-weighted reading.
+
+## Remediation actions (gain per cost, worst-case reading)
+
+Removing a channel's classical fallback stops its classical sessions now. Recorded classical traffic stays sunk, so its risk effect equals migrating the channel now (the remediable part, Proposition 7(f)); it differs in cost, which here is the refused legacy share.
+
+| Action | Channel | Cost | Gain (worst) | Gain (share) | Gain / cost |
+|---|---|---|---|---|---|
+| remove_fallback | gw->client | 0.258 | 0.68 | 0.0 | 2.637 |
+| migrate | gw->client | 1.0 | 0.68 | 0.0 | 0.68 |
+| migrate | lb->gw | 1.0 | 0.03 | 0.733 | 0.03 |
+
+## Complementarity (gap = g(e, f) - g(e) - g(f); positive means fixing one raises the other's value)
+
+- worst: max gap 0.091; complementary pairs: gw->client + lb->gw: 0.091, appa->lb + lb->gw: 0.021
+- share: max gap 0.128; complementary pairs: appa->lb + lb->gw: 0.128
+
+## Uncertainty (200 draws, T_Q ~ U[5,20], 201-point grid)
+
+The ranking is recomputed for each draw of the uncertain parameters (C, L, O, t_fix, H as specified in groundtruth.json). P(top-1) and P(top-k) are over draws in which some channel has a positive gain. Declared values are treated as medians of lognormal distributions unless a channel or class spec says otherwise. Rule: robust first fix = channel with the highest P(top-1) over draws with any positive gain; ties broken by mean gain, then by name.
+
+### worst reading: robust first fix gw->client (point estimate: gw->client; draws with no positive gain: 0)
+
+| Channel | Point gain | Mean gain | 90% interval | P(top-1) | P(top-3) |
+|---|---|---|---|---|---|
+| gw->client | 0.68 | 0.711 | 0.178–1.239 | 0.945 | 0.985 |
+| lb->gw | 0.03 | 0.067 | 0.0–0.342 | 0.055 | 0.73 |
+| appa->lb | 0.0 | 0.015 | 0.0–0.075 | 0.0 | 0.55 |
+| appb->appa | 0.0 | 0.0 | 0.0–0.002 | 0.0 | 0.245 |
+
+### share reading: robust first fix lb->gw (point estimate: lb->gw; draws with no positive gain: 0)
+
+| Channel | Point gain | Mean gain | 90% interval | P(top-1) | P(top-3) |
+|---|---|---|---|---|---|
+| lb->gw | 0.733 | 0.739 | 0.0–1.703 | 0.88 | 0.935 |
+| appa->lb | 0.0 | 0.058 | 0.0–0.309 | 0.12 | 0.57 |
+| appb->appa | 0.0 | 0.0 | 0.0–0.002 | 0.0 | 0.3 |
+
+**Robust first fixes diverge between readings.**
+
+## Coverage
+
+- Data classes with labeled flows: 100%
+- Labeled share of inferred flow channels: 73%
+- Flow channels with negotiation telemetry: 100%
+- Channels with an unattributed caller: 0; residual risk if they carried the classes of their server: 0.0
+
+## CRQC-arrival prior x T_PQ sensitivity (propagated risk)
+
+| Prior | T_PQ | records worst | records share | profile worst | profile share |
+|---|---|---|---|---|---|
+| uniform[5,20] | inf | 4.067 | 2.4 | 0.34 | 0.25 |
+| uniform[5,20] | 15.0 | 4.067 | 2.4 | 0.34 | 0.25 |
+| uniform[5,20] | 10.0 | 4.067 | 3.448 | 0.34 | 0.25 |
+| late uniform[10,30] | inf | 0.925 | 0.612 | 0.0 | 0.0 |
+| late uniform[10,30] | 15.0 | 0.925 | 0.612 | 0.0 | 0.0 |
+| late uniform[10,30] | 10.0 | 0.925 | 0.925 | 0.0 | 0.0 |
+| early 5+Exp(mean 4) | inf | 7.264 | 4.1 | 0.911 | 0.644 |
+| early 5+Exp(mean 4) | 15.0 | 7.264 | 4.1 | 0.911 | 0.644 |
+| early 5+Exp(mean 4) | 10.0 | 7.264 | 5.671 | 0.911 | 0.644 |
+| lognormal median 12 | inf | 4.12 | 2.441 | 0.274 | 0.208 |
+| lognormal median 12 | 15.0 | 4.12 | 2.441 | 0.274 | 0.208 |
+| lognormal median 12 | 10.0 | 4.12 | 3.605 | 0.274 | 0.208 |
+
 ## TNFL (E[T_Q~U(5,20)])
 
 | Key | Acceptance horizon τ | Forgery window S | Quantum-vulnerable |
