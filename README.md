@@ -135,8 +135,7 @@ decrypt later (SNDL).
 
 ## Status and contributing
 
-This is a working draft. The HTML version includes an editor's note (hidden in print)
-listing the remaining pre-submission items. Questions, field data on key-exchange shares and
+This is a preprint, not yet submitted to a venue. Questions, field data on key-exchange shares and
 counterexamples are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md), or start a
 [discussion](https://github.com/exocognosis/PQC-topology/discussions).
 
