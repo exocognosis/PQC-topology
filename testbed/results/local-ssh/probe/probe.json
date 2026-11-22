@@ -1,0 +1,230 @@
+{
+  "listeners": {
+    "gw:443": {
+      "host": "gw",
+      "port": 443,
+      "reachable": true,
+      "tls_versions": [
+        "TLSv1.2",
+        "TLSv1.3"
+      ],
+      "groups": [
+        "X25519MLKEM768",
+        "X25519",
+        "prime256v1"
+      ],
+      "tls12_ciphers": [
+        "ECDHE-ECDSA-AES256-GCM-SHA384",
+        "ECDHE-ECDSA-AES128-GCM-SHA256",
+        "ECDHE-ECDSA-CHACHA20-POLY1305"
+      ],
+      "tls12_groups": [
+        "X25519",
+        "prime256v1"
+      ],
+      "cert": {
+        "subject": "O=PQC Testbed, CN=gw",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "EC-P256",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      }
+    },
+    "lb:8443": {
+      "host": "lb",
+      "port": 8443,
+      "reachable": true,
+      "tls_versions": [
+        "TLSv1.2"
+      ],
+      "groups": [],
+      "tls12_ciphers": [
+        "AES256-GCM-SHA384"
+      ],
+      "tls12_groups": [],
+      "cert": {
+        "subject": "O=PQC Testbed, CN=lb",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "RSA-2048",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      }
+    },
+    "appa:9443": {
+      "host": "appa",
+      "port": 9443,
+      "reachable": true,
+      "tls_versions": [
+        "TLSv1.3"
+      ],
+      "groups": [
+        "X25519"
+      ],
+      "tls12_ciphers": [],
+      "tls12_groups": [],
+      "cert": {
+        "subject": "O=PQC Testbed, CN=appa",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "EC-P256",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      }
+    },
+    "appb:9444": {
+      "host": "appb",
+      "port": 9444,
+      "reachable": true,
+      "tls_versions": [
+        "TLSv1.3"
+      ],
+      "groups": [
+        "X25519"
+      ],
+      "tls12_ciphers": [],
+      "tls12_groups": [],
+      "cert": {
+        "subject": "O=PQC Testbed, CN=appb",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "EC-P256",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      }
+    },
+    "data:7443": {
+      "host": "data",
+      "port": 7443,
+      "reachable": true,
+      "tls_versions": [
+        "TLSv1.3"
+      ],
+      "groups": [
+        "X25519MLKEM768"
+      ],
+      "tls12_ciphers": [],
+      "tls12_groups": [],
+      "cert": {
+        "subject": "O=PQC Testbed, CN=data",
+        "issuer": "O=PQC Testbed, CN=PQ Root (ML-DSA-65)",
+        "key": "ML-DSA-65",
+        "sig": "ML-DSA-65",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      }
+    }
+  },
+  "static": {
+    "certs": {
+      "appa": {
+        "subject": "O=PQC Testbed, CN=appa",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "EC-P256",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      },
+      "appb": {
+        "subject": "O=PQC Testbed, CN=appb",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "EC-P256",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      },
+      "data": {
+        "subject": "O=PQC Testbed, CN=data",
+        "issuer": "O=PQC Testbed, CN=PQ Root (ML-DSA-65)",
+        "key": "ML-DSA-65",
+        "sig": "ML-DSA-65",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      },
+      "fw-signer": {
+        "subject": "O=PQC Testbed, CN=fw-signer",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "EC-P256",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Nov 20 15:52:29 2029 GMT",
+        "is_ca": false
+      },
+      "gw": {
+        "subject": "O=PQC Testbed, CN=gw",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "EC-P256",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      },
+      "int-ecdsa": {
+        "subject": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "issuer": "O=PQC Testbed, CN=Legacy Root (RSA-4096)",
+        "key": "EC-P256",
+        "sig": "sha256WithRSAEncryption",
+        "not_after": "Nov 20 15:52:29 2031 GMT",
+        "is_ca": true
+      },
+      "lb-client": {
+        "subject": "O=PQC Testbed, CN=lb-client",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "EC-P256",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      },
+      "lb": {
+        "subject": "O=PQC Testbed, CN=lb",
+        "issuer": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+        "key": "RSA-2048",
+        "sig": "ecdsa-with-SHA256",
+        "not_after": "Dec 24 15:52:29 2027 GMT",
+        "is_ca": false
+      },
+      "root-mldsa": {
+        "subject": "O=PQC Testbed, CN=PQ Root (ML-DSA-65)",
+        "issuer": "O=PQC Testbed, CN=PQ Root (ML-DSA-65)",
+        "key": "ML-DSA-65",
+        "sig": "ML-DSA-65",
+        "not_after": "Nov 18 15:52:29 2036 GMT",
+        "is_ca": true
+      },
+      "root-rsa": {
+        "subject": "O=PQC Testbed, CN=Legacy Root (RSA-4096)",
+        "issuer": "O=PQC Testbed, CN=Legacy Root (RSA-4096)",
+        "key": "RSA-4096",
+        "sig": "sha256WithRSAEncryption",
+        "not_after": "Nov 16 15:52:29 2046 GMT",
+        "is_ca": true
+      }
+    },
+    "signatures": {
+      "firmware.bin.p7s": {
+        "signature_algorithms": [
+          "ecdsa-with-SHA256"
+        ],
+        "digest_algorithms": [
+          "sha256"
+        ],
+        "embedded_cert_subjects": [
+          "O=PQC Testbed, CN=fw-signer",
+          "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)"
+        ]
+      }
+    }
+  },
+  "ssh": [
+    {
+      "host": "data",
+      "kex_algorithms": [
+        "mlkem768x25519-sha256",
+        "sntrup761x25519-sha512@openssh.com",
+        "curve25519-sha256",
+        "ecdh-sha2-nistp256",
+        "ext-info-s",
+        "kex-strict-s-v00@openssh.com"
+      ]
+    }
+  ]
+}

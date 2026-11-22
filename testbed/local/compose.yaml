@@ -1,0 +1,127 @@
+# Local single-host version of the testbed (Option A). Same addresses,
+# hostnames, configs and PKI as the Hetzner deployment, so the scorer runs
+# unchanged. Run from the testbed root:  make local-run
+name: pqc-testbed
+
+x-svc: &svc
+  image: pqc-nginx
+  cap_add: [NET_ADMIN, NET_RAW]
+  environment: &env
+    CAPTURE: "1"
+  extra_hosts: &hosts
+    - "gw:10.42.1.10"
+    - "lb:10.42.1.11"
+    - "appa:10.42.1.12"
+    - "data:10.42.1.13"
+    - "appb:10.42.1.14"
+
+services:
+  gw:
+    <<: *svc
+    environment: { <<: *env, ROLE: gw }
+    volumes:
+      - ../roles/gw/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../pki/out:/pki:ro
+      - ../results/${RUN:-local}/gw:/run-out
+    networks:
+      internet: { ipv4_address: 172.30.0.10 }
+      estate: { ipv4_address: 10.42.1.10 }
+  lb:
+    <<: *svc
+    environment: { <<: *env, ROLE: lb }
+    volumes:
+      - ../roles/lb/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../pki/out:/pki:ro
+      - ../results/${RUN:-local}/lb:/run-out
+    networks:
+      estate: { ipv4_address: 10.42.1.11 }
+  appa:
+    <<: *svc
+    environment: { <<: *env, ROLE: appa }
+    volumes:
+      - ../roles/appa/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../pki/out:/pki:ro
+      - ../results/${RUN:-local}/appa:/run-out
+    networks:
+      estate: { ipv4_address: 10.42.1.12 }
+  appb:
+    <<: *svc
+    environment: { <<: *env, ROLE: appb, SSH_PULL: "1", CLIENT_CLASS: appb, SSH_INTERVAL: "5" }
+    volumes:
+      - ../roles/appb/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../clients:/clients:ro
+      - ../pki/out:/pki:ro
+      - ../results/${RUN:-local}/appb:/run-out
+    networks:
+      estate: { ipv4_address: 10.42.1.14 }
+  data:
+    <<: *svc
+    environment:
+      <<: *env
+      ROLE: data
+      SSHD: "1"
+      SSH_KEX: "mlkem768x25519-sha256,sntrup761x25519-sha512@openssh.com,curve25519-sha256,ecdh-sha2-nistp256"
+    volumes:
+      - ../roles/data/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ../roles/data/records:/srv/records:ro
+      - ../pki/out:/pki:ro
+      - ../results/${RUN:-local}/data:/run-out
+    networks:
+      estate: { ipv4_address: 10.42.1.13 }
+
+  client-modern:
+    image: pqc-nginx
+    depends_on: [gw, lb, appa, appb, data]
+    environment: { ROLE: client, CLIENT_CLASS: modern, INTERVAL: "1" }
+    extra_hosts: ["gw:172.30.0.10"]
+    volumes:
+      - ../clients:/clients:ro
+      - ../pki/out:/pki:ro
+      - ../results/${RUN:-local}/client:/run-out
+    networks:
+      internet: { ipv4_address: 172.30.0.21 }
+  client-legacy:
+    image: pqc-legacy-client
+    depends_on: [gw, lb, appa, appb, data]
+    environment: { CLIENT_CLASS: legacy, INTERVAL: "3" }
+    extra_hosts: ["gw:172.30.0.10"]
+    volumes:
+      - ../clients:/clients:ro
+      - ../pki/out:/pki:ro
+      - ../results/${RUN:-local}/client:/run-out
+    networks:
+      internet: { ipv4_address: 172.30.0.22 }
+
+  # Legacy operations host (OpenSSH 8.x) pulling backups over SSH.
+  ops:
+    image: pqc-legacy-client
+    depends_on: [data]
+    entrypoint: ["/bin/sh", "/clients/ssh-pull.sh"]
+    environment: { CLIENT_CLASS: ops, SSH_INTERVAL: "7" }
+    extra_hosts: *hosts
+    volumes:
+      - ../clients:/clients:ro
+      - ../pki/out:/pki:ro
+      - ../results/${RUN:-local}/ops:/run-out
+    networks:
+      estate: { ipv4_address: 10.42.1.21 }
+
+  probe:
+    image: pqc-nginx
+    profiles: [probe]
+    environment: { ROLE: probe }
+    extra_hosts: *hosts
+    volumes:
+      - ../tools:/tools:ro
+      - ../groundtruth.json:/groundtruth.json:ro
+      - ../pki/out:/artifacts:ro
+      - ../results/${RUN:-local}/probe:/run-out
+    networks:
+      estate: { ipv4_address: 10.42.1.30 }
+    command: ["python3", "/tools/probe.py", "--groundtruth", "/groundtruth.json", "--static-dir", "/artifacts", "--ssh", "data", "--out", "/run-out/probe.json"]
+
+networks:
+  internet:
+    ipam: { config: [{ subnet: 172.30.0.0/24 }] }
+  estate:
+    ipam: { config: [{ subnet: 10.42.1.0/24 }] }

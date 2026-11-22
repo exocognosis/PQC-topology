@@ -1,0 +1,12 @@
+.terraform/
+*.tfstate*
+terraform.tfvars
+.ssh_known_hosts*
+pki/out/
+# run results are published, except packet captures and operator logs
+results/*.log
+results/**/capture.pcap
+results/**/*.err
+tfplan
+terraform/tfplan
+__pycache__/

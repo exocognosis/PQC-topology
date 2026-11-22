@@ -1,0 +1,850 @@
+<title>Topological PQC Discovery</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@500;600;700&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap">
+<style>
+/* Layout: single reading column (~68ch) for an academic paper; formal environments as tinted panels; wide tables and figures scroll in their own boxes. */
+:root{
+  --bg:#fbfcfd; --fg:#17202a; --muted:#56626e; --rule:#dce2e8; --panel:#eef2f6;
+  --accent:#1d5c8c; --bad:#b3392f; --good:#2f7a4f; --warn:#9a6a12;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10151b; --fg:#e2e7ed; --muted:#98a4b0; --rule:#2a333d; --panel:#18202a;
+  --accent:#86bce6; --bad:#ee7d72; --good:#6fc493; --warn:#e0b257; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10151b; --fg:#e2e7ed; --muted:#98a4b0; --rule:#2a333d; --panel:#18202a;
+  --accent:#86bce6; --bad:#ee7d72; --good:#6fc493; --warn:#e0b257; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--serif);font-size:17.5px;line-height:1.62;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:40px 80px}
+main{max-width:46rem;margin:0 auto;display:flex;flex-direction:column;gap:0}
+h1,h2,h3,h4{font-family:var(--sans);text-wrap:balance;line-height:1.25;margin:0}
+h1{font-size:2rem;font-weight:700;letter-spacing:-.01em}
+.subtitle{font-family:var(--sans);font-size:1.08rem;color:var(--muted);margin:.5rem 0 0}
+h2{font-size:1.3rem;font-weight:600;margin:2.6rem 0 .7rem;padding-top:.9rem;border-top:1px solid var(--rule)}
+h3{font-size:1.04rem;font-weight:600;margin:1.7rem 0 .4rem}
+p{margin:.7rem 0}
+a{color:var(--accent)}
+a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+header{padding-bottom:1.2rem}
+.byline{font-family:var(--sans);font-size:.95rem;margin-top:1.1rem;color:var(--fg)}
+.byline span{color:var(--muted)}
+.meta{font-family:var(--sans);font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:.6rem}
+.abstract{background:var(--panel);border-radius:6px;padding:1.1rem 1.3rem;margin-top:1.4rem}
+.abstract h4,.kw{font-family:var(--sans);font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.abstract p{margin:.45rem 0 0}
+.kw{margin-top:.8rem;text-transform:none;letter-spacing:0;font-size:.85rem}
+nav.toc{font-family:var(--sans);font-size:.9rem;margin-top:1.6rem}
+nav.toc ol{margin:.4rem 0 0;padding-left:1.4rem;columns:2;column-gap:2rem}
+nav.toc li{break-inside:avoid;margin:.12rem 0}
+@media (max-width:560px){nav.toc ol{columns:1}}
+.env{background:var(--panel);border-radius:6px;padding:.75rem 1.05rem;margin:1rem 0}
+.env > p:first-child{margin-top:0}.env > p:last-child{margin-bottom:0}
+.lab{font-family:var(--sans);font-weight:600;font-size:.92rem;margin-right:.35rem}
+.lab.def{color:var(--accent)}
+.proof{font-size:.96rem;color:var(--fg)}
+.proof .lab{font-style:italic;font-weight:500}
+ul,ol{padding-left:1.4rem;margin:.6rem 0}
+li{margin:.25rem 0}
+.tbl{overflow-x:auto;margin:1rem 0;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;font-size:.9rem;min-width:100%;font-family:var(--sans)}
+th,td{text-align:left;padding:.45rem .6rem;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-weight:600;font-size:.78rem;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+td.n{font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+caption{caption-side:bottom;text-align:left;font-size:.85rem;color:var(--muted);padding-top:.5rem;font-family:var(--serif)}
+figure{margin:1.2rem 0}
+figure .wrap{overflow-x:auto}
+figcaption{font-size:.88rem;color:var(--muted);margin-top:.4rem}
+svg.topo{display:block;min-width:620px;width:100%;height:auto;font-family:var(--sans)}
+code,pre{font-family:var(--mono);font-size:.84em}
+pre{background:var(--panel);border-radius:6px;padding:.9rem 1rem;overflow-x:auto;line-height:1.5}
+.math{overflow-x:auto;overflow-y:hidden;margin:.8rem 0}
+mjx-container[display="true"]{margin:.6rem 0 !important}
+.tag{display:inline-block;font-family:var(--sans);font-size:.72rem;font-weight:600;letter-spacing:.04em;padding:.05rem .4rem;border-radius:3px;border:1px solid currentColor}
+.t-bad{color:var(--bad)}.t-good{color:var(--good)}.t-warn{color:var(--warn)}
+.refs li{font-size:.93rem;margin:.4rem 0}
+.note{border:1px dashed var(--rule);border-radius:6px;padding:1rem 1.2rem;margin-top:1rem;font-size:.95rem}
+.note h3{margin-top:0}
+.small{font-size:.9rem;color:var(--muted)}
+.verify{font-family:var(--sans);font-size:.78rem;font-weight:600;color:var(--warn)}
+@media (max-width:520px){body{font-size:16.5px}h1{font-size:1.6rem}}
+@media (prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+@page{size:Letter;margin:0.85in 0.9in}
+@media print{
+  :root{--bg:#fff}
+  body{font-size:10.5pt;line-height:1.5;padding:0;background:#fff}
+  main{max-width:none}
+  h1{font-size:20pt}
+  h2{font-size:13pt;margin-top:1.6rem;break-after:avoid}
+  h3{break-after:avoid}
+  .env,figure,.tbl,pre,.abstract{break-inside:avoid}
+  #appD .tbl{break-inside:auto}
+  .tbl,figure .wrap,.math{overflow:visible}
+  svg.topo{min-width:0}
+  nav.toc,#appC{display:none}
+  a{color:inherit;text-decoration:none}
+}
+</style>
+<script>
+window.MathJax={tex:{inlineMath:[['\\(','\\)']],displayMath:[['\\[','\\]']],macros:{Tq:'T_{\\mathrm{Q}}',tfix:'t_{\\mathrm{fix}}',Ch:'\\mathrm{Ch}',E:'\\mathbb{E}',pos:['\\left[#1\\right]^{+}',1]}},svg:{fontCache:'global'}};
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js" defer></script>
+
+<main>
+<header>
+  <h1>Topological Post-Quantum Cryptography Discovery</h1>
+  <p class="subtitle">A typed graph model of harvest-now and forge-later risk, with exposure windows, break-time semantics, and remediation planning</p>
+  <p class="byline">Rick Glenn <span>· Technical Cofounder, Dytallix, Inc. · rick@dytallix.com</span></p>
+  <p class="meta">Revised draft · November 2026</p>
+  <div class="abstract">
+    <h4>Abstract</h4>
+    <p>Migrating an enterprise to post-quantum cryptography (PQC) requires knowing which cryptographic primitives protect which data and which trust relationships, and in what order to replace them. Endpoint-by-endpoint inventories miss a basic fact: data protected by quantum-safe cryptography on one hop can be exposed by vulnerable cryptography on another hop it later traverses. We model the estate as a typed, attributed multigraph that separates assets, data classes, channels (each carrying a stack of cryptographic layers), and trust relations. Primitives are classified by a <em>break time</em>, which unifies quantum vulnerability (Shor, Grover) with classical deprecation, and composes through explicit rules for layers, nested channels, and hybrid constructions.</p>
+    <p>For the harvest-now, decrypt-later (HNDL) threat we define an <em>exposure window</em>: the span of traffic that is both recordable and still sensitive when it becomes decryptable. With long transmission history it reduces exactly to Mosca's inequality. It also splits risk into a sunk part that migration cannot recover and a remediable part that it can, and it extends to a probability distribution over the arrival of a cryptographically relevant quantum computer. Trust-now, forge-later (TNFL) risk is modeled separately on the trust graph, through the time each key remains accepted by verifiers, and propagates in the opposite direction. We prove dominance, monotonicity, and condensation-equivalence properties of the propagation, machine-check the exposure-window lemma, the core risk properties, the fixpoint and condensation results, and the layer-cake identity in Lean 4, give a linear-time algorithm per lifespan tier, and show that budgeted remediation selection is NP-hard and not submodular under worst-case aggregation. Worked examples, a CycloneDX CBOM mapping, generalizations to arbitrary algorithm sunsets, and an evaluation on a reproducible testbed are included. On the testbed, run both on one host and on six cloud servers, discovery recovers the deployed configuration exactly, and a gateway that supports hybrid key exchange still negotiates classical X25519 for 26–27% of its handshakes. Likewise, a legacy SSH client negotiates classical key exchange with a server that offers ML-KEM. We therefore extend the model to channels whose sessions negotiate a mix of configurations. Weighting exposure by the measured shares reverses which of two channels should be remediated first. On synthetic estates, propagation handles 100,000 services in under a second, rankings tolerate about 10% error in the declared parameters but not 25%, and the two readings choose different first fixes in about half of the estates.</p>
+    <p class="kw"><strong>Keywords:</strong> post-quantum migration, cryptographic inventory, CBOM, Mosca inequality, attack graphs, harvest-now-decrypt-later, crypto-agility</p>
+  </div>
+  <nav class="toc" aria-label="Contents">
+    <ol>
+      <li><a href="#s1">Introduction</a></li>
+      <li><a href="#s2">Background and related work</a></li>
+      <li><a href="#s3">Threat model and assumptions</a></li>
+      <li><a href="#s4">System model</a></li>
+      <li><a href="#s5">Primitive classification as break times</a></li>
+      <li><a href="#s6">HNDL risk: exposure windows and propagation</a></li>
+      <li><a href="#s7">TNFL risk on the trust graph</a></li>
+      <li><a href="#s8">Remediation planning</a></li>
+      <li><a href="#s9">Discovery pipeline and CBOM output</a></li>
+      <li><a href="#s10">Worked examples</a></li>
+      <li><a href="#s11">Generalization and adjacent domains</a></li>
+      <li><a href="#s12">Limitations</a></li>
+      <li><a href="#s13">Testbed evaluation</a></li>
+      <li><a href="#s14">Conclusion</a></li>
+    </ol>
+  </nav>
+</header>
+
+<section id="s1">
+<h2>1. Introduction</h2>
+<p>A cryptographically relevant quantum computer (CRQC) would break the public-key primitives that protect most key establishment and authentication today. NIST has standardized replacements: ML-KEM (FIPS 203), ML-DSA (FIPS 204), and SLH-DSA (FIPS 205), alongside the stateful hash-based signatures LMS and XMSS (SP 800-208). Migration timelines are now explicit: NIST IR 8547 (initial public draft) proposes deprecating quantum-vulnerable public-key algorithms at the 112-bit security level after 2030 and disallowing them after 2035, and NSA's CNSA 2.0 sets earlier dates for national security systems. Two threats make the problem urgent before a CRQC exists.</p>
+<ul>
+  <li><strong>Harvest now, decrypt later (HNDL).</strong> An adversary records ciphertext today and decrypts it once a CRQC is available. This applies to traffic protected by RSA key transport and equally to traffic protected by ephemeral (EC)DHE: forward secrecy protects against later compromise of long-term keys, but Shor's algorithm recovers each ephemeral shared secret directly from the recorded handshake. Forward secrecy therefore gives no protection against HNDL.</li>
+  <li><strong>Trust now, forge later (TNFL).</strong> Once a CRQC exists, signatures under quantum-vulnerable keys can be forged. Live authentication sessions that have already ended cannot be retroactively spoofed, but any key that verifiers still accept on or after that date can be used to impersonate endpoints, issue rogue certificates, or sign malicious firmware. Long-lived signed artifacts (archives, contracts, code, ledger entries) also lose non-repudiation, because a forger can produce signatures indistinguishable from historical ones.</li>
+</ul>
+<p>Cryptographic inventories that report each endpoint in isolation cannot tell whether a database whose own connections use quantum-safe key establishment is nevertheless exposed because its data is later relayed over a quantum-vulnerable channel. They also conflate two threats that propagate in opposite directions: confidentiality exposure follows data <em>downstream</em> along the channels that carry it, whereas forgery exposure follows certification <em>down from</em> trust anchors to everything they vouch for. This paper builds a model that keeps these distinctions explicit.</p>
+<p>Recent work has begun to formalize parts of this problem: formal models of migration, risk propagation over asset graphs, and structured HNDL exposure measures (§2.5). This paper extends that line, building in particular on the formal model of cryptographic migration of Loebenberger et al. (2024).</p>
+<p><strong>Contributions.</strong></p>
+<ul>
+  <li>A typed, attributed multigraph that separates assets, data classes, channels with layered cryptographic bundles, and trust relations (§4).</li>
+  <li>Break-time semantics for primitive classification, with composition rules for components within a layer, nested layers, and hybrid constructions. The same semantics cover quantum attacks, classical deprecation deadlines, and possible breaks of post-quantum schemes (§5, §6).</li>
+  <li>An HNDL exposure-window measure that recovers Mosca's inequality as a special case, separates sunk from remediable risk, supports a probability distribution over the CRQC arrival time, and extends to channels whose sessions negotiate a mix of configurations (§6).</li>
+  <li>A TNFL model, separate from HNDL, based on how long each key remains accepted by verifiers and propagated downward on the trust graph (§7). It quantifies when authentication becomes as urgent as confidentiality, which migration guidance usually treats only qualitatively.</li>
+  <li>Propagation as an idempotent fixpoint, with proofs of dominance, monotonicity, condensation equivalence, and linear running time per lifespan tier (§6.4, Appendix B).</li>
+  <li>Machine-checked proofs in Lean 4 with Mathlib of Lemmas 1 and 2, Propositions 1–4 and 6–8, and Corollary 1, with Propositions 1–3 also in expectation (Appendix D). To our knowledge these are the first machine-checked results about a PQC migration risk model.</li>
+  <li>Complexity results for remediation selection and scheduling, with practical heuristics (§8), and a mapping to CycloneDX CBOM (§9).</li>
+  <li>A reproducible testbed with declared ground truth, deployable locally or on Hetzner Cloud, and a first evaluation of discovery accuracy, the gap between supported and negotiated key exchange, and the model's risk outputs, extended to synthetic estates of up to 100,000 services (§13).</li>
+</ul>
+<p>The framework is a decision-support model. Its outputs are only as good as the discovered graph and the supplied parameters, and §13 reports a first evaluation on a reproducible testbed rather than a production estate.</p>
+</section>
+
+<section id="s2">
+<h2>2. Background and related work</h2>
+<h3>2.1 Mosca's inequality and quantum timelines</h3>
+<p>Mosca observed that if \(x\) is the number of years data must stay confidential, \(y\) the years needed to migrate, and \(z\) the years until a CRQC exists, then \(x + y > z\) implies data is already at risk (Mosca, 2018; preprint 2015). The Global Risk Institute's annual Quantum Threat Timeline Report (Mosca &amp; Piani) publishes expert-elicited probability estimates for \(z\), which motivates treating it as a random variable rather than a constant. Mosca's inequality concerns confidentiality; we show in §7 that the analogous condition for signatures has a different form.</p>
+<h3>2.2 Quantum attacks on classical primitives</h3>
+<p>Shor's algorithm solves integer factorization and discrete logarithms, including over elliptic curves, in polynomial time on a fault-tolerant quantum computer (Shor, 1997). The best known classical attacks are sub-exponential (the number field sieve) or exponential (Pollard rho on elliptic curves), so the quantum speedup is super-polynomial. Grover's algorithm gives a quadratic speedup for unstructured search (Grover, 1996). Grover search parallelizes poorly: \(P\) machines reduce wall-clock time only by a factor of \(\sqrt{P}\). For this reason NIST defines its lowest PQC security category relative to AES-128 key search and continues to approve AES-128, while CNSA 2.0 requires AES-256 for national security systems. We treat the Grover margin as a policy parameter (§5).</p>
+<h3>2.3 Attack graphs and risk propagation</h3>
+<p>Propagating vulnerability through network dependencies is well studied in the attack-graph literature: model-checking-based generation (Sheyner et al., 2002), logic-programming reachability in MulVAL (Ou et al., 2005), and probabilistic risk on Bayesian attack graphs (Poolsappasit et al., 2012). These works model exploitation of software vulnerabilities by an active adversary. Our setting differs in three ways: the adversary for HNDL is passive and acts across time; the vulnerability is a property of cryptographic configuration that has a time-dependent break point rather than a present exploit; and the quantity of interest is a window of exposed data rather than a reachable privilege. Our propagation is an instance of algebraic path problems over idempotent semirings (Carré, 1979; Mohri, 2002), which guarantees well-defined fixpoints on cyclic graphs.</p>
+<h3>2.4 Cryptographic inventory and CBOM</h3>
+<p>NIST's NCCoE project on migration to PQC (SP 1800-38) describes discovery tooling and inventory practice. CycloneDX introduced a Cryptographic Bill of Materials (CBOM) in version 1.6 (2024), with cryptographic-asset components describing algorithms, protocols, certificates, and related material. These efforts focus on <em>what</em> cryptography exists. This paper contributes a model of <em>how it composes</em> across an estate and how to rank remediation.</p>
+<h3>2.5 Quantitative and formal models of PQC migration</h3>
+<p>Several recent works formalize parts of the problem addressed here.</p>
+<ul>
+  <li><strong>Formal models of migration.</strong> Loebenberger et al. (2024) give a formal model of cryptographic migration and use combinatorial and probabilistic arguments to analyze its expected complexity, with numerical data and case studies. Their work is the closest formal antecedent of this paper, which extends it in three ways: confidentiality and authenticity exposure are quantified in time, layered and hybrid cryptography is composed explicitly, and remediation is ranked by risk rather than only made feasible.</li>
+  <li><strong>Graph-based risk propagation.</strong> Hasan et al. (2024) use graph-theoretic analysis of cryptographic dependencies to prioritize which systems to migrate. Erlemann, Morris, and Sathe (2026) model assets as a heterogeneous knowledge graph, propagate risk along dependencies with graph-theoretic risk functionals, and attribute exposure across cryptographic domains with Shapley values. Neither, to our knowledge, gives fixpoint semantics for cyclic dependencies or separates the harvest-now and forge-later propagation directions.</li>
+  <li><strong>Harvest-now exposure measures.</strong> Rufino, Marcelino, and Garcia (2026) derive the functional form of an HNDL compromise probability from assumptions about adversary and value-decay dynamics, and argue that additive scores cannot reproduce it. Other work fits a quantum-arrival law to published expert estimates to express the cost of delaying migration (Shaw, 2026), embed a Monte Carlo timing-risk model based on Mosca's inequality in an enterprise-cloud transition framework (Gupta &amp; Mittal, 2026), or extends the inequality into a multi-factor risk score, QARS (Grigaliūnas &amp; Brūzgienė, 2025), building on the Global Risk Institute methodology (Mosca &amp; Mulholland, 2017).</li>
+  <li><strong>Confidentiality versus authentication.</strong> Migration guidance commonly treats harvest-now decryption as the more urgent threat and signatures as a later concern. Prior work on wide-area networks separates exposure priority from migration readiness and evidence confidence when deciding which services to migrate first (Alam, 2026). Our TNFL model quantifies when authentication becomes urgent, by measuring how long keys stay accepted and propagating forgery risk down the trust graph.</li>
+  <li><strong>Remediation selection.</strong> Mixed-integer and QUBO formulations of budget-constrained migration with dependencies have been proposed and evaluated on synthetic inventories (Figueira, Duarte, &amp; Silva, 2026).</li>
+  <li><strong>Formal verification.</strong> Ajith, Ibrahim, and Haroon (2026) translate the communication graphs of distributed systems into Tamarin models to check the secrecy and authentication of migration paths symbolically. Machine-checked work elsewhere in PQC verifies algorithm implementations. We are not aware of machine-checked results about a migration <em>risk</em> model.</li>
+</ul>
+<p>We found no attack-graph or Bayesian treatment of HNDL exposure, which remains an open direction.</p>
+</section>
+
+<section id="s3">
+<h2>3. Threat model and assumptions</h2>
+<p>Time is measured in years from the present, \(t = 0\). A CRQC becomes available at time \(\Tq \ge 0\), a random variable with cumulative distribution function \(F\). All Shor-vulnerable primitives are assumed to fall at the same time \(\Tq\): their failures are perfectly correlated.</p>
+<div class="env">
+<p><span class="lab">HNDL adversary.</span> A passive adversary who, at any time \(t \le 0\) or later, can record ciphertext on a channel \(e\) with intensity given by the channel's observability \(O(e) \in [0,1]\). From the time a channel's cryptography breaks, the adversary can recover plaintext from every recording of it, past or future.</p>
+<p><span class="lab">TNFL adversary.</span> An active adversary who, from time \(\Tq\), can produce valid signatures under any Shor-vulnerable key, and can deliver forged artifacts or handshakes to a verifier with reachability \(A(a) \in [0,1]\).</p>
+</div>
+<p>We make the following modeling assumptions and refer to them by label.</p>
+<ul>
+  <li><strong>A1 (Independent layer keys).</strong> Nested encryption layers derive keys independently, so breaking one layer reveals nothing about another.</li>
+  <li><strong>A2 (Correct hybrids).</strong> A hybrid key establishment is secure if either component is secure, which holds for combiners that bind both shared secrets and the transcript. Constructions without this property are classified by their weakest component.</li>
+  <li><strong>A3 (Authenticated negotiation).</strong> Before \(\Tq\), protocol negotiation is protected by classical transcript authentication (as in TLS 1.3), so an adversary cannot force a downgrade. Downgrade is therefore an active, post-\(\Tq\) concern, not an HNDL concern. Fallback that endpoints accept voluntarily is captured by the negotiated-suite shares of §6.6 and §9, not by this assumption.</li>
+  <li><strong>A4 (Non-zero observability floor).</strong> Internal and air-gapped segments receive a small positive \(O(e)\) rather than zero, to account for insiders, provider-side taps, and misrouted traffic.</li>
+  <li><strong>A5 (Correct implementations).</strong> Side channels, implementation defects, and key-management failures are out of scope.</li>
+  <li><strong>A6 (PQC break time).</strong> Standardized PQC primitives are assumed unbroken (\(T = \infty\)) by default. The breaks of SIKE/SIDH (Castryck &amp; Decru, 2023) and Rainbow (Beullens, 2022) show this is an assumption, and are a reason to prefer hybrids during transition. A policy can instead give each post-quantum scheme a break time \(T_{\mathrm{PQ}}\), fixed or random. Schemes that are not standardized, such as sntrup761 (§13.8), are natural candidates. Lemma 2 and Corollary 1 give the effect on exposure, and §13.7 reports a sensitivity analysis.</li>
+</ul>
+</section>
+
+<section id="s4">
+<h2>4. System model</h2>
+<div class="env">
+<p><span class="lab def">Definition 1 (Estate graph).</span> The estate is a tuple \(\mathcal{G} = (V_A, \mathcal{D}, E_{\mathrm{ch}}, K, E_{\mathrm{tr}})\) where</p>
+<ul>
+  <li>\(V_A = V_{\mathrm{Net}} \cup V_{\mathrm{Dev}} \cup V_{\mathrm{Store}}\) is a set of <em>assets</em>: network endpoints and services, devices (appliances, HSMs, KMS), and storage (file shares, databases, images). The subsets are disjoint; a real object with several roles is several linked assets.</li>
+  <li>\(\mathcal{D}\) is a set of <em>data classes</em>. Each \(d \in \mathcal{D}\) has an origin asset \(o(d) \in V_A\), a criticality \(C(d) \in [0,1]\), and a confidentiality lifetime \(L(d) \ge 0\) in years.</li>
+  <li>\(E_{\mathrm{ch}}\) is a multiset of directed <em>channels</em> \(e = (x \to y)\) between assets, oriented in the direction data moves. A request/response connection is two channels.</li>
+  <li>\(K\) is a set of <em>keys</em> (with their certificates), and \(E_{\mathrm{tr}}\) is a set of directed <em>trust edges</em>: \(k \to k'\) when \(k\) certifies \(k'\), and \(k \to a\) when \(k\) signs or authenticates asset or artifact \(a\).</li>
+</ul>
+</div>
+<p>Primitives live where they act. Channel cryptography is an edge attribute, because its effect depends on which hop it protects. Keys are vertices only in the trust graph, where they have dependencies of their own.</p>
+<div class="env">
+<p><span class="lab def">Definition 2 (Cryptographic bundle and layer stack).</span> A <em>layer</em> is a bundle \(\ell = (\mathsf{kex}, \mathsf{auth}, \mathsf{cipher}, \mathsf{hash})\) naming the key establishment, peer authentication, bulk encryption, and hash or MAC of one protocol instance (a TLS session, an IPsec SA, an application-level envelope). A channel carries a stack \(\Lambda(e) = (\ell_1, \dots, \ell_m)\) from outermost to innermost. An end-to-end layer spanning several hops appears in the stack of each hop it covers.</p>
+</div>
+<p>Each channel also has an observability \(O(e)\), a remediation time \(\tfix(e) \ge 0\) (years from now until the channel's vulnerable layers are replaced), and for each data class it carries a history \(H_e(d) \ge 0\) (years it has already carried \(d\) under its current configuration). We write \(\Ch(d)\) for the set of channels that carry \(d\); §6.4 explains how it is labeled or inferred.</p>
+<div class="tbl"><table>
+<thead><tr><th>Symbol</th><th>Domain</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>\(C(d), C(a)\)</td><td>[0,1]</td><td>Criticality of a data class or artifact</td></tr>
+<tr><td>\(L(d)\)</td><td>years</td><td>Confidentiality lifetime (Mosca's \(x\))</td></tr>
+<tr><td>\(O(e)\)</td><td>[0,1]</td><td>Observability of channel \(e\) to a passive recorder</td></tr>
+<tr><td>\(H_e(d)\)</td><td>years</td><td>How long \(e\) has already carried \(d\) in its current configuration</td></tr>
+<tr><td>\(\tfix(e)\)</td><td>years</td><td>Time until \(e\) is remediated (Mosca's \(y\), per channel)</td></tr>
+<tr><td>\(T_c, T_\ell, T_e\)</td><td>years ∪ {∞}</td><td>Break time of a component, layer, channel (§5)</td></tr>
+<tr><td>\(\Tq, F\)</td><td>years</td><td>CRQC arrival time and its CDF (Mosca's \(z\))</td></tr>
+<tr><td>\(\tau(k)\)</td><td>years ∪ {∞}</td><td>Time until key \(k\) is no longer accepted by any verifier (§7)</td></tr>
+<tr><td>\(A(a)\)</td><td>[0,1]</td><td>Reachability of a verifier of \(a\) by a forger</td></tr>
+</tbody>
+<caption>Table 1. Notation.</caption>
+</table></div>
+</section>
+
+<section id="s5">
+<h2>5. Primitive classification as break times</h2>
+<p>Instead of a categorical label per primitive, each cryptographic component \(c\) is assigned a <em>break time</em> \(T_c \in [0, \infty]\): the time from which an adversary in our threat model can defeat it. Classification becomes a mapping into break times, and every downstream formula uses break times directly. This makes the classification part of the risk computation, so a quantum-safe configuration contributes zero risk by construction.</p>
+<div class="tbl"><table>
+<thead><tr><th>Class</th><th>Examples</th><th>Break time</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td><span class="tag t-bad">Classically broken</span></td><td>RSA-1024, MD5, SHA-1 signatures, RC4, export suites, 3DES (Sweet32)</td><td>\(0\)</td><td>Already deprecated or practically attackable; remediate regardless of quantum timelines</td></tr>
+<tr><td><span class="tag t-bad">Shor-vulnerable</span></td><td>RSA (any size), finite-field DH, ECDH (X25519, P-256), ECDSA, EdDSA (Ed25519), DSA</td><td>\(\Tq\)</td><td>All share one random \(\Tq\)</td></tr>
+<tr><td><span class="tag t-warn">Grover-reduced</span></td><td>AES-128, SHA-256 (preimage), HMAC-SHA-256</td><td>\(\infty\) or policy \(T_s\)</td><td>\(\infty\) under NIST Category 1; under CNSA 2.0 a compliance deadline \(T_s\)</td></tr>
+<tr><td><span class="tag t-good">Post-quantum</span></td><td>ML-KEM, ML-DSA, SLH-DSA, LMS/XMSS; AES-256</td><td>\(\infty\) (A6) or \(T_{\mathrm{PQ}}\)</td><td>A policy may assign a finite or random \(T_{\mathrm{PQ}}\) (A6, Corollary 1)</td></tr>
+<tr><td><span class="tag t-good">Hybrid</span></td><td>X25519MLKEM768; composite signatures</td><td>\(\max(\Tq, T_{\mathrm{PQ}})\) by rule H</td><td>See below</td></tr>
+<tr><td><span class="tag">Unknown</span></td><td>Opaque blobs, proprietary protocols</td><td>unscored</td><td>Flagged for review; optional conservative setting \(T = \Tq\)</td></tr>
+</tbody>
+<caption>Table 2. Classification. 3DES is listed as classically broken: its 64-bit block makes it vulnerable to birthday attacks today, independent of Grover.</caption>
+</table></div>
+<div class="env">
+<p><span class="lab def">Definition 3 (Composition rules for confidentiality).</span></p>
+<ul>
+  <li><strong>Within a layer:</strong> confidentiality fails if either key establishment or bulk encryption fails, so \(T_\ell = \min(T_{\mathsf{kex}}, T_{\mathsf{cipher}})\). Authentication does not enter, because the HNDL adversary is passive.</li>
+  <li><strong>Nested layers (A1):</strong> plaintext is exposed only when every layer is broken, so \(T_e = \max_{\ell \in \Lambda(e)} T_\ell\).</li>
+  <li><strong>Rule H, hybrid key establishment (A2):</strong> \(T_{\mathsf{kex}} = \max(T_{\mathrm{classical}}, T_{\mathrm{PQ}})\).</li>
+</ul>
+<p><span class="lab def">Rule H for signatures.</span> A composite signature that verifiers accept only when <em>both</em> components verify has \(T = \max\) of its components. If verifiers accept <em>either</em> component, \(T = \min\).</p>
+</div>
+<p>A bulk cipher alone does not determine exposure. A TLS session using AES-256-GCM over ECDHE has \(T_\ell = \min(\Tq, \infty) = \Tq\), so it is HNDL-exposed. Only the full bundle determines exposure.</p>
+<p>Sequential hops are not combined by a rule in this section. Each hop that carries a data class is a separate opportunity for recording, and §6 aggregates over them.</p>
+</section>
+
+<section id="s6">
+<h2>6. HNDL risk: exposure windows and propagation</h2>
+<h3>6.1 The exposure window</h3>
+<p>Fix a data class \(d\) and a channel \(e \in \Ch(d)\). Traffic of class \(d\) sent over \(e\) at time \(t\) is exposed if three conditions hold. First, it was sent under the current configuration: \(-H_e(d) \le t \le \tfix(e)\). Second, it can be decrypted: this happens at time \(\max(t, T_e)\). Third, it is still sensitive at that time: \(\max(t, T_e) \lt t + L(d)\), which for \(t \lt T_e\) means \(t \gt T_e - L(d)\) and for \(t \ge T_e\) always holds. The set of exposed transmission times is an interval.</p>
+<div class="env">
+<p><span class="lab def">Definition 4 (Exposure window).</span> The exposure window of \(d\) on \(e\) is the length of that interval:</p>
+<div class="math">\[ W_e(d) \;=\; \pos{\, \tfix(e) \;-\; \max\{\, -H_e(d),\; T_e - L(d) \,\}\,} \]</div>
+<p>Its units are years of traffic.</p>
+</div>
+<div class="env">
+<p><span class="lab">Lemma 1 (Mosca recovery and decomposition).</span> <span class="tag t-good">Lean</span></p>
+<ol>
+  <li>If \(H_e(d) \ge L(d) - T_e\) (the channel has carried \(d\) at least since the start of the sensitive window), then \(W_e(d) = \pos{L(d) + \tfix(e) - T_e}\). This is Mosca's slack \((x + y - z)^+\), and \(W_e(d) \gt 0\) if and only if \(x + y \gt z\).</li>
+  <li>Let \(W^0_e(d)\) be the window if the channel were fixed immediately (\(\tfix = 0\)). Then \(W^0_e(d) = \pos{\min\{H_e(d),\, L(d) - T_e\}}\). This is the <em>sunk</em> exposure: traffic already sent that will still be sensitive when it becomes decryptable. No migration can reduce it.</li>
+  <li>The <em>remediable</em> part is \(W_e(d) - W^0_e(d) = \min\{\tfix(e),\, W_e(d)\}\).</li>
+  <li>If \(T_e = \infty\), then \(W_e(d) = W^0_e(d) = 0\).</li>
+</ol>
+</div>
+<p>Part 2 makes the sunk loss precise. Any recorded traffic under a Shor-vulnerable key establishment, forward-secret or not, whose sensitivity outlasts \(\Tq\) is already lost. Migration controls only the remediable part. The sunk part calls for other responses: rotating credentials that crossed the channel, reducing \(L(d)\) by deleting or re-scoping data, and assuming compromise in incident planning.</p>
+<p>Rufino, Marcelino, and Garcia (2026) also model HNDL exposure, as a compromise probability whose form they derive from assumptions about adversary and value-decay dynamics. The exposure window differs in two respects: it is defined per channel, so it composes with the topology of §6.4, and it separates the sunk part from the remediable part. A detailed comparison of the two formulations is left for future work.</p>
+<div class="env">
+<p><span class="lab">Lemma 2 (Windows under composition).</span> <span class="tag t-good">Lean</span> For break times \(T_1, T_2 \in [0, \infty]\), with the other parameters fixed, \(W(\max\{T_1, T_2\}) = \min\{W(T_1), W(T_2)\}\) and \(W(\min\{T_1, T_2\}) = \max\{W(T_1), W(T_2)\}\).</p>
+</div>
+<p>By Definition 3, a hybrid key establishment and a nested layer stack are therefore never more exposed than any of their parts, and a single layer is exactly as exposed as the weaker of its key establishment and bulk cipher. This holds for every value of \(T_{\mathrm{PQ}}\), not only the \(\infty\) of assumption A6. A hybrid protects exactly as far as its post-quantum part outlasts \(\Tq\).</p>
+
+<h3>6.2 Risk of a data class</h3>
+<div class="env">
+<p><span class="lab def">Definition 5 (HNDL risk).</span> For a set of channels \(S\),</p>
+<div class="math">\[ R_S(d) \;=\; C(d)\cdot \E_{\Tq}\!\Big[\, \max_{e \in S}\; O(e)\, W_e(d) \,\Big]. \]</div>
+<p>The <em>propagated</em> risk is \(R(d) = R_{\Ch(d)}(d)\). The <em>local</em> risk is \(R_{\mathrm{loc}}(d) = R_{\Ch_{\mathrm{loc}}(d)}(d)\), where \(\Ch_{\mathrm{loc}}(d)\) is the set of channels incident to the origin \(o(d)\). The sunk risk \(R^0(d)\) uses \(W^0\), and the remediable risk is \(R(d) - R^0(d)\).</p>
+</div>
+<p>Units are criticality-weighted years of exposed traffic. The score is a ranking quantity, not a calibrated loss. The expectation is taken outside the maximum: because all Shor-vulnerable channels share one \(\Tq\), the maximum over channels must be evaluated per realization, and the expectation is a one-dimensional integral. The maximum is a worst-case aggregator. A variant that accounts for multiple recording opportunities reads \(O\) as an independent recording probability and replaces only the observability term, giving \(\big(1 - \prod_{e : W_e \gt 0} (1 - O(e))\big) \cdot \max_e W_e(d)\) inside the expectation. It keeps the units of years.</p>
+<p>An asset's roll-up score is \(R(u) = \max\{R(d) : o(d) = u\}\), combined with its TNFL score from §7 when a single number per asset is required.</p>
+
+<h3>6.3 Properties</h3>
+<div class="env">
+<p><span class="lab">Proposition 1 (Dominance).</span> <span class="tag t-good">Lean</span> \(R(d) \ge R_{\mathrm{loc}}(d)\) for every \(d\).</p>
+<p><span class="lab">Proposition 2 (Monotonicity).</span> <span class="tag t-good">Lean</span> \(R(d)\) is non-decreasing in \(C(d)\), \(L(d)\), each \(O(e)\), each \(H_e(d)\), and each \(\tfix(e)\); non-increasing in each \(T_e\) (pointwise); and non-decreasing when a channel is added to \(\Ch(d)\).</p>
+<p><span class="lab">Proposition 3 (Zero risk).</span> <span class="tag t-good">Lean</span> \(R(d) = 0\) if and only if, for every \(e \in \Ch(d)\), either \(O(e) = 0\) or, almost surely, \(T_e \ge \tfix(e) + L(d)\) or \(\tfix(e) + H_e(d) = 0\). In particular, a data class carried only over channels whose every layer stack contains a post-quantum or correctly bound hybrid layer has zero HNDL risk.</p>
+</div>
+<p>Proposition 1 guarantees that considering more of the topology never lowers a score. Proposition 3 guarantees that classification drives the score: quantum-safe configurations contribute nothing. Proofs are in Appendix B.</p>
+
+<h3>6.4 Computing \(\Ch(d)\): labeled and inferred flows</h3>
+<p>When application metadata, data-loss-prevention tags, or service-mesh policy identify which data classes a channel carries, \(\Ch(d)\) is given directly and \(R(d)\) is computed in \(O(\sum_e |\mathcal{D}(e)|)\) time, where \(\mathcal{D}(e)\) is the set of classes on \(e\). This <em>labeled</em> mode is the precise one.</p>
+<p>When labels are unavailable, flows are <em>inferred</em> by reachability. Channels are oriented along the read path: if service \(y\) calls service \(x\), the response channel \(x \to y\) carries data held or relayed by \(x\). The inferred set is</p>
+<div class="math">\[ \widehat{\Ch}(d) = \{\, e = (x \to y) \in E_{\mathrm{ch}} : x \text{ is reachable from } o(d) \,\}. \]</div>
+<p>Inference over-approximates, \(\Ch(d) \subseteq \widehat{\Ch}(d)\), provided every channel that carries \(d\) is in \(E_{\mathrm{ch}}\) and is oriented in the direction \(d\) moves. Under that condition, Proposition 2 implies inference never under-reports risk. Read-path orientation alone does not satisfy the condition for write and replication flows. It is imprecise in two known ways. A relay that forwards only some of its inputs is treated as forwarding all of them. If both directions of every connection are added, every connected service becomes a single strongly connected component and inference degenerates to "everything reaches everything." Write paths, where callers send their own data to services, should therefore be labeled rather than inferred.</p>
+<p>Without labels, the per-class history \(H_e(d)\) is unknown, so inferred mode uses a single per-channel history \(H_e\) (the age of the channel's current configuration). Then the edge value \(\omega_d(e) = O(e)\,W_e(d)\), for a fixed realization of \(\Tq\), depends on \(d\) only through \(L(d)\). The per-origin value \(X(u) = \max\{\omega_d(e) : e \in \widehat{\Ch}(d)\}\) satisfies</p>
+<div class="math">\[ X(u) = \max\Big(\max_{e = (u \to x)} \omega_d(e),\; \max_{(u \to x)} X(x)\Big). \]</div>
+<div class="env">
+<p><span class="lab">Proposition 4 (Fixpoint and condensation).</span> <span class="tag t-good">Lean</span> On any finite channel graph, cyclic or not, the recurrence has a least fixpoint equal to the maximum of \(\omega_d\) over the channels whose tail is reachable from \(u\). It is constant on each strongly connected component, and the value computed on the condensation DAG (each component's value is the maximum over its outgoing channels and its successor components) equals the fixpoint.</p>
+<p><span class="lab">Proposition 5 (Complexity).</span> In inferred mode with per-channel histories, if data classes are grouped into \(\kappa\) lifespan tiers (classes in one tier share \(L\)), all inferred risks are computed in \(O(\kappa(|V_A| + |E_{\mathrm{ch}}|))\) time per realization of \(\Tq\), and in \(O(\kappa\, q\, (|V_A| + |E_{\mathrm{ch}}|))\) time with a \(q\)-point quadrature over \(F\).</p>
+</div>
+<p>Cycles, such as mutual calls between microservices, do not threaten termination: the recurrence takes values in a finite set and is monotone, so naive iteration terminates in at most \(|V_A|\) rounds. Condensation is used for speed and for the explicit linear bound. The edge value depends on the data class only through \(L(d)\), given the per-channel history assumed for inferred mode, which is why the bound is per lifespan tier rather than a single linear pass. Appendix A gives the algorithm.</p>
+
+<h3>6.5 Probabilistic CRQC arrival</h3>
+<div class="env">
+<p><span class="lab">Proposition 6.</span> <span class="tag t-good">Lean</span> For a single channel with \(H_e(d) \ge L(d)\) and \(T_e = \Tq \ge 0\), let \(a = \tfix(e) + L(d)\). Then</p>
+<div class="math">\[ \E\big[W_e(d)\big] = \int_0^{a} F(s)\,ds, \qquad \Pr\big[W_e(d) \gt 0\big] = F(a), \qquad \E\big[W^0_e(d)\big] = \int_0^{L(d)} F(s)\,ds. \]</div>
+</div>
+<p>This complements point-value sensitivity analysis with a quantity that weights every possible arrival time by its probability. Point values remain useful as scenario checks and are shown in §10. Any arrival distribution can be used for \(F\): an expert-survey distribution (Mosca &amp; Piani), an arrival law fitted in closed form to such estimates (Shaw, 2026), once expressed as a distribution function, or samples from a Monte Carlo timing model (Gupta &amp; Mittal, 2026).</p>
+<div class="env">
+<p><span class="lab">Corollary 1 (Post-quantum components).</span> <span class="tag t-good">Lean</span> Under the conditions of Proposition 6, let a hybrid key establishment have break time \(\max(\Tq, T_{\mathrm{PQ}})\), where \(T_{\mathrm{PQ}} \ge 0\) has distribution function \(G\) and may equal \(\infty\) with positive probability. Then</p>
+<div class="math">\[ \E\big[W_e(d)\big] = \int_0^{a} \Pr\big[\Tq \le s,\; T_{\mathrm{PQ}} \le s\big]\,ds, \]</div>
+<p>which equals \(\int_0^a F(s)\,G(s)\,ds\) when \(\Tq\) and \(T_{\mathrm{PQ}}\) are independent. Without independence it lies between \(\int_0^a \pos{F(s) + G(s) - 1}\,ds\) and \(\int_0^a \min\{F(s), G(s)\}\,ds\). A channel protected only by the post-quantum scheme has \(\E[W_e(d)] = \int_0^a G(s)\,ds\).</p>
+</div>
+<p>Under independence, a hybrid reduces expected exposure by \(\int_0^a F(1 - G)\) compared with classical key establishment, and by \(\int_0^a G(1 - F)\) compared with the post-quantum scheme alone. Under A6, \(G \equiv 0\) and the hybrid's exposure is zero. Independence is optimistic if both breaks could come from the same advance, such as a quantum algorithm for lattice problems. The bounds hold without it, and the upper bound is attained when the two break times are comonotone.</p>
+
+<h3>6.6 Channels with mixed negotiation</h3>
+<p>The sessions on one channel need not all negotiate the same configuration. A gateway that supports both hybrid and classical groups negotiates hybrid with modern clients and classical with legacy ones (§13.3). Definitions 4 and 5 give each channel a single break time. Applied to such a channel, that break time must be the earliest among the configurations it negotiates, which scores the channel as if every session were classical.</p>
+<div class="env">
+<p><span class="lab def">Definition 4′ (Session mixture).</span> Let \(K(e)\) be the set of configurations negotiated on channel \(e\), where configuration \(k\) has layer-stack break time \(T_{e,k}\). Let \(q_e(k)\) be the share of the sessions carrying \(d\) that negotiate \(k\), with \(\sum_k q_e(k) = 1\). Let \(W_{e,k}(d)\) be the window of Definition 4 with \(T_e = T_{e,k}\). The <em>share-weighted window</em> is</p>
+<div class="math">\[ \overline{W}_e(d) \;=\; \sum_{k \in K(e)} q_e(k)\, W_{e,k}(d), \]</div>
+<p>and the <em>share-weighted risk</em> \(\overline{R}_S(d)\) is Definition 5 with \(\overline{W}_e\) in place of \(W_e\). The sunk part \(\overline{W}^0_e(d)\) is defined in the same way from \(W^0_{e,k}(d)\).</p>
+</div>
+<p>The two definitions answer different questions:</p>
+<ul>
+  <li><strong>Worst-case reading.</strong> Definition 5 with \(T_e = \min\{T_{e,k} : q_e(k) \gt 0\}\) asks whether <em>any</em> traffic of \(d\) on \(e\) is exposed. It suits data classes where one exposed record is enough, such as credentials, keys and session secrets.</li>
+  <li><strong>Share-weighted reading.</strong> \(\overline{R}\) asks <em>how much</em> of that traffic is exposed. It suits bulk data, such as records and telemetry.</li>
+</ul>
+<div class="env">
+<p><span class="lab">Proposition 7 (Session mixtures).</span> <span class="tag t-good">Lean</span> For every realization of \(\Tq\):</p>
+<ol type="a">
+  <li>A channel that negotiates a single configuration has \(\overline{W}_e(d) = W_e(d)\), so the two readings agree.</li>
+  <li>If every configuration except \(k_0\) is never broken, then \(\overline{W}_e(d) = q_e(k_0)\, W_{e,k_0}(d)\): exposure scales linearly with the share of the vulnerable configuration.</li>
+  <li>\(\overline{R}_S(d) \le R_S(d)\), where \(R_S\) uses the worst-case break time. The worst-case reading is an upper bound.</li>
+  <li>Propositions 1 and 2 hold for \(\overline{R}\), which is also non-decreasing in each share \(q_e(k)\). Hence moving sessions to a configuration that breaks earlier never lowers \(\overline{R}\).</li>
+  <li>\(\overline{R}(d) = 0\) if and only if, for every \(e \in \Ch(d)\) with \(O(e) \gt 0\), every configuration with \(q_e(k) \gt 0\) has \(W_{e,k}(d) = 0\). This is the same zero set as the worst-case reading, so Proposition 3 is unchanged.</li>
+  <li>Sunk and remediable parts mix linearly: \(\overline{W}_e(d) - \overline{W}^0_e(d) = \sum_k q_e(k) \min\{\tfix(e), W_{e,k}(d)\}\).</li>
+</ol>
+</div>
+<p>The share-weighted reading rests on three assumptions:</p>
+<ul>
+  <li><strong>Uniform mixing.</strong> Traffic of \(d\) is spread over the configurations in the channel's overall proportions. If one class reaches only legacy clients, its share of the classical configuration is 1. Where request metadata identifies data classes, \(q_e(k)\) should be measured per class.</li>
+  <li><strong>Stationarity.</strong> Shares measured today are applied to the whole history \(H_e(d)\). If the classical share has fallen over time, the measured share underestimates historical exposure, and the sunk part should use historical telemetry or the worst-case reading.</li>
+  <li><strong>Passive adversary.</strong> An adversary who can force classical fallback is active and outside the HNDL threat model (§3). The worst-case reading covers that case.</li>
+</ul>
+<p>Mixed channels also add a remediation action. Besides migrating a channel, an operator can remove its classical fallback, which drives \(q_e(k_0)\) to zero at the cost of refusing legacy clients. By Proposition 7(b), that action is worth \(O(e)\, q_e(k_0)\, W_{e,k_0}(d)\) on the channel, before aggregation.</p>
+</section>
+
+<section id="s7">
+<h2>7. TNFL risk on the trust graph</h2>
+<p>Mosca's inequality does not transfer to signatures by adding validity to migration time. A forger needs a key that some verifier still <em>accepts</em> at or after \(\Tq\). What matters is when the key stops being accepted, not how long data stays secret.</p>
+<div class="env">
+<p><span class="lab def">Definition 6 (Acceptance horizon).</span> For key \(k\) with remaining certificate validity \(V(k)\), migration time \(T_{\mathrm{mig}}(k)\), and time \(D(k)\) to distribute its replacement and distrust it at every verifier,</p>
+<div class="math">\[ \tau(k) = \min\big\{\, V(k)\ \text{if verifiers enforce expiry, else } \infty,\;\; T_{\mathrm{mig}}(k) + D(k),\;\; \Lambda(k) \,\big\}, \]</div>
+<p>where \(\Lambda(k)\) is the remaining service life of the last verifier that trusts \(k\). For anchors in read-only memory or in devices that cannot be updated, \(D(k) = \infty\) and \(\tau(k) = \min(V(k), \Lambda(k))\), and expiry is often not enforced.</p>
+<p><span class="lab def">Definition 7 (Forgery window and TNFL risk).</span> The forgery window of \(k\) is \(S(k) = \pos{\tau(k) - T_k}\), where \(T_k\) is the break time of \(k\)'s signature algorithm (\(\Tq\) for RSA or ECDSA keys, and \(T_{\mathrm{PQ}}\) for post-quantum keys when A6 is relaxed). For an asset or artifact \(a\) with ancestor set \(\mathrm{Anc}(a)\) in the trust graph,</p>
+<div class="math">\[ R_{\mathrm{T}}(a) = C(a)\, A(a)\cdot \E_{\Tq}\Big[\max_{k \in \mathrm{Anc}(a)} S(k)\Big]. \]</div>
+</div>
+<p>Two features distinguish TNFL from HNDL. First, \(\tau\) combines its terms with a minimum, not a sum: an enforced short validity <em>limits</em> exposure rather than adding to it. Second, risk propagates <em>downward</em> along certification and signing edges, from an anchor to everything it vouches for, because forging any key on a chain allows an attacker to mint valid descendants. This is the reverse of HNDL propagation. Ancestor maxima are computed with the same condensation technique as Proposition 4, applied to the reversed trust graph, which handles cycles from cross-certification.</p>
+<p><strong>Long-lived signatures.</strong> Signed artifacts that must remain non-repudiable for \(L_{\mathrm{nr}}(a)\) years after signing time \(t_s\) are exposed if \(t_s + L_{\mathrm{nr}}(a) \gt \Tq\), regardless of key migration, because a forger can create a convincing back-dated signature. The remedy is renewal of archival evidence with post-quantum timestamps, for example Evidence Record Syntax (RFC 4998), before \(\Tq\).</p>
+<p><strong>Hybrid and composite signatures.</strong> These reduce TNFL risk only when verifiers require both components (Rule H). Verifiers that accept either component, or that keep classical-only fallback, remain exposed after \(\Tq\). This is where active downgrade matters, unlike the passive HNDL setting.</p>
+</section>
+
+<section id="s8">
+<h2>8. Remediation planning</h2>
+<p>Scores rank assets, but migration acts on configuration units: a listener's TLS policy, a KMS key, a CA hierarchy, a library version. Let \(\mathcal{P}\) be the set of such units, each with a cost \(c(p)\), and let fixing \(p\) set the break times of the layers or keys it controls to \(\infty\) at time \(\tfix(p)\).</p>
+<h3>8.1 Threshold remediation is easy</h3>
+<p>To bring every data class below a threshold \(\theta\) under worst-case aggregation, every channel with \(C(d)\,O(e)\,W_e(d) \gt \theta\) for some \(d\) must be fixed, and the sunk risk must already be at most \(\theta\). The required set is the union of these channels' units, computed in one pass. If any \(R^0(d) \gt \theta\), no migration plan can meet the threshold and the report should say so.</p>
+<h3>8.2 Budgeted selection is hard and not submodular</h3>
+<p>With a budget \(B\), choosing units to maximize the total weight of data classes brought below \(\theta\) is a set-union knapsack problem: a class counts only when <em>all</em> units covering its offending channels are chosen. The set-union knapsack problem is NP-hard (Goldschmidt et al., 1994). Hardness is unsurprising given the knapsack structure, and mixed-integer and QUBO formulations of budgeted migration with dependencies already exist (Figueira, Duarte, &amp; Silva, 2026). What this section adds is a structural fact about the objective that affects which heuristics are sound.</p>
+<div class="env">
+<p><span class="lab">Proposition 8 (Non-submodularity).</span> <span class="tag t-good">Lean</span> Under worst-case aggregation, total risk reduction is not a submodular function of the set of fixed units, so greedy selection carries no general approximation guarantee.</p>
+<p class="proof"><span class="lab">Example.</span> Let \(d\) be carried by channels \(e_1, e_2\) with equal \(O = 1\), \(W_{e_1} = W_{e_2} = 7\), and \(W^0 = 5\) on both. Fixing either one alone leaves the maximum at 7, a reduction of 0. Fixing both reduces it to 5, a reduction of 2. The marginal value of \(e_2\) increases when \(e_1\) is added, violating diminishing returns. ∎</p>
+</div>
+<p>The testbed shows the same effect on measured handshakes (§13.5).</p>
+<p>A practical heuristic is a <em>group-aware greedy</em>. Its candidates are single units and, for each data class, the group of units whose channels carry remediable exposure for that class. Each step adds the candidate with the largest marginal risk reduction per unit of cost that still fits the budget. Groups handle the complementarity in the example. On synthetic estates the heuristic reduces, but does not remove, the gap to the optimum (§13.9). When the noisy-OR aggregation of §6.2 is used, gains are better behaved, and we leave the conditions for submodularity in that setting as an open question.</p>
+<h3>8.3 Scheduling</h3>
+<p>Remediable risk grows linearly with \(\tfix\) (Lemma 1). Choosing an order for units subject to precedence constraints (a load balancer must support ML-KEM before the services behind it can require it) to minimize weighted completion time generalizes single-machine weighted completion-time scheduling with precedence constraints, which is NP-hard (Lenstra &amp; Rinnooy Kan, 1978). Weighted shortest-processing-time order with precedence repair is a reasonable baseline.</p>
+</section>
+
+<section id="s9">
+<h2>9. Discovery pipeline and CBOM output</h2>
+<p>Populating \(\mathcal{G}\) uses several sources, none of which handle secret key material.</p>
+<ul>
+  <li><strong>Active probing</strong> of TLS, SSH, and IPsec endpoints reveals what a server <em>supports</em> and prefers. It does not reveal what real clients <em>negotiate</em>: a server offering X25519MLKEM768 may still negotiate X25519 with most legacy clients.</li>
+  <li><strong>Passive observation</strong> (handshake telemetry from load balancers and proxies, flow logs, eBPF sensors) measures negotiated suites. A channel that negotiates several bundles is split into sub-channels, one per bundle \(s\), each carrying share \(\pi_e(s)\) of the traffic. Observability and windows apply per sub-channel.</li>
+  <li><strong>Control-plane interrogation</strong> through read-only APIs of cloud KMS, certificate managers, and load balancers yields key metadata and trust relations.</li>
+  <li><strong>Static parsing</strong> of ASN.1/DER/PEM objects, container images, and binaries yields certificates, signature algorithms, and linked cryptographic libraries. The libraries connect the CBOM to the software bill of materials (§11).</li>
+  <li><strong>Asset and data catalogs</strong> provide \(C\), \(L\), and data-class labels, which discovery cannot infer reliably.</li>
+</ul>
+<p>Output is a CycloneDX CBOM. Algorithms, protocols, certificates, and keys map to cryptographic-asset components. CycloneDX defines no standard field for a risk score, so scores and their inputs are emitted as namespaced properties, for example <code>dytallix:risk:hndl</code>, <code>dytallix:risk:hndl:sunk</code>, <code>dytallix:risk:tnfl</code>, and <code>dytallix:break-time-class</code>. Each score is accompanied by the evidence that produced it (probe result, observed negotiation share, or catalog entry), so a reviewer can trace it back to its source.</p>
+</section>
+
+<section id="s10">
+<h2>10. Worked examples</h2>
+<h3>10.1 HNDL: a database behind a load balancer and gateway</h3>
+<p>A database \(u\) holds data class \(d\) with \(C(d) = 1\) and \(L(d) = 15\). It is read by a load balancer \(v\), which is called by an API gateway \(w\), which serves internet clients \(z\). The read path is \(u \to v \to w \to z\).</p>
+<figure>
+<div class="wrap">
+<svg class="topo" viewBox="0 0 740 170" role="img" aria-label="Read path from database u through load balancer v and gateway w to internet clients z, with three channels e1 hybrid safe, e2 RSA key transport vulnerable, e3 X25519 vulnerable">
+  <defs>
+    <marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--muted)"/></marker>
+  </defs>
+  <g style="font-size:14px">
+    <rect x="10" y="30" width="120" height="56" rx="6" style="fill:var(--panel);stroke:var(--rule)"/>
+    <text x="70" y="54" text-anchor="middle" style="fill:var(--fg);font-weight:600">u · Database</text>
+    <text x="70" y="74" text-anchor="middle" style="fill:var(--muted);font-size:12px">origin of d</text>
+    <rect x="210" y="30" width="120" height="56" rx="6" style="fill:var(--panel);stroke:var(--rule)"/>
+    <text x="270" y="54" text-anchor="middle" style="fill:var(--fg);font-weight:600">v · Load bal.</text>
+    <text x="270" y="74" text-anchor="middle" style="fill:var(--muted);font-size:12px">internal</text>
+    <rect x="410" y="30" width="120" height="56" rx="6" style="fill:var(--panel);stroke:var(--rule)"/>
+    <text x="470" y="54" text-anchor="middle" style="fill:var(--fg);font-weight:600">w · Gateway</text>
+    <text x="470" y="74" text-anchor="middle" style="fill:var(--muted);font-size:12px">edge</text>
+    <rect x="610" y="30" width="120" height="56" rx="6" style="fill:var(--panel);stroke:var(--rule)"/>
+    <text x="670" y="54" text-anchor="middle" style="fill:var(--fg);font-weight:600">z · Clients</text>
+    <text x="670" y="74" text-anchor="middle" style="fill:var(--muted);font-size:12px">internet</text>
+  </g>
+  <g style="stroke-width:2.5;fill:none">
+    <line x1="132" y1="58" x2="206" y2="58" style="stroke:var(--good)" marker-end="url(#ah)"/>
+    <line x1="332" y1="58" x2="406" y2="58" style="stroke:var(--bad)" marker-end="url(#ah)"/>
+    <line x1="532" y1="58" x2="606" y2="58" style="stroke:var(--bad)" marker-end="url(#ah)"/>
+  </g>
+  <g style="font-size:12px" text-anchor="middle">
+    <text x="170" y="112" style="fill:var(--good);font-weight:600">e₁ hybrid</text>
+    <text x="170" y="128" style="fill:var(--muted)">T = ∞ · O = 0.1</text>
+    <text x="370" y="112" style="fill:var(--bad);font-weight:600">e₂ RSA kex</text>
+    <text x="370" y="128" style="fill:var(--muted)">T = T_Q · O = 0.5</text>
+    <text x="570" y="112" style="fill:var(--bad);font-weight:600">e₃ X25519</text>
+    <text x="570" y="128" style="fill:var(--muted)">T = T_Q · O = 1.0</text>
+  </g>
+  <text x="370" y="160" text-anchor="middle" style="fill:var(--muted);font-size:11.5px">t_fix = 2 years on e₂ and e₃ · long history (H ≥ L)</text>
+</svg>
+</div>
+<figcaption>Figure 1. Read path for data class \(d\). Green: quantum-safe channel. Red: Shor-vulnerable key establishment.</figcaption>
+</figure>
+<ul>
+  <li>\(e_1 = u \to v\): TLS 1.3 with X25519MLKEM768 and AES-256-GCM. By Rule H, \(T_{e_1} = \infty\). Internal segment, \(O = 0.1\).</li>
+  <li>\(e_2 = v \to w\): TLS 1.2 with RSA key transport. \(T_{e_2} = \Tq\). Shared cloud segment, \(O = 0.5\).</li>
+  <li>\(e_3 = w \to z\): TLS 1.3 with X25519 and AES-128-GCM. The key establishment gives \(T_{e_3} = \Tq\); AES-128 does not change this under either Grover policy. Internet, \(O = 1\).</li>
+  <li>\(\tfix = 2\) for \(e_2\) and \(e_3\); both have carried \(d\) for longer than \(L\).</li>
+</ul>
+<p><strong>Point scenario, \(\Tq = 10\).</strong> \(W_{e_1} = 0\). For \(e_2\) and \(e_3\), Lemma 1 gives \(W = (15 + 2 - 10)^+ = 7\), with sunk part \(W^0 = \min(H, 15 - 10) = 5\) and remediable part \(\min(2, 7) = 2\).</p>
+<ul>
+  <li>Local risk: only \(e_1\) is incident to \(u\), so \(R_{\mathrm{loc}}(d) = 1 \cdot 0.1 \cdot 0 = 0\). Local risk is zero because the database's own link is quantum-safe; an endpoint-only inventory would rate this asset as safe.</li>
+  <li>Propagated risk: \(R(d) = \max(0.1 \cdot 0,\; 0.5 \cdot 7,\; 1.0 \cdot 7) = 7.0\).</li>
+  <li>Sunk risk: \(R^0(d) = \max(0.5 \cdot 5,\; 1.0 \cdot 5) = 5.0\). Remediable risk: \(2.0\).</li>
+</ul>
+<p>Five of the seven criticality-weighted years are already lost: traffic recorded over the past five years will still be sensitive when \(\Tq = 10\) arrives. Migration can prevent only the remaining two.</p>
+<div class="tbl"><table>
+<thead><tr><th>\(\Tq\)</th><th>\(W_{e_3}\)</th><th>\(R(d)\)</th><th>Sunk \(R^0(d)\)</th><th>Remediable</th></tr></thead>
+<tbody>
+<tr><td class="n">5</td><td class="n">12</td><td class="n">12.0</td><td class="n">10.0</td><td class="n">2.0</td></tr>
+<tr><td class="n">10</td><td class="n">7</td><td class="n">7.0</td><td class="n">5.0</td><td class="n">2.0</td></tr>
+<tr><td class="n">15</td><td class="n">2</td><td class="n">2.0</td><td class="n">0.0</td><td class="n">2.0</td></tr>
+<tr><td class="n">17</td><td class="n">0</td><td class="n">0.0</td><td class="n">0.0</td><td class="n">0.0</td></tr>
+</tbody>
+<caption>Table 3. Scenario sensitivity. \(e_3\) dominates the maximum in every row. Risk falls one-for-one with \(\Tq\) until the sunk part vanishes at \(\Tq = L = 15\); the remediable part stays at \(\tfix = 2\) until \(\Tq\) exceeds 15.</caption>
+</table></div>
+<p><strong>Probabilistic scenario.</strong> For illustration only (not a forecast), let \(\Tq \sim \mathrm{Uniform}[5, 20]\), so \(F(s) = (s - 5)/15\) on that interval. Both vulnerable channels share \(\Tq\) and \(\tfix\), so the maximum is attained on \(e_3\) for every realization. By Proposition 6 with \(a = 17\):</p>
+<div class="math">\[ R(d) = \int_5^{17} \tfrac{s-5}{15}\,ds = \tfrac{144}{30} = 4.8, \qquad \Pr[\text{exposed}] = F(17) = 0.8, \qquad R^0(d) = \int_5^{15} \tfrac{s-5}{15}\,ds = \tfrac{100}{30} \approx 3.33. \]</div>
+<p>The expected remediable risk is about 1.47. A Monte Carlo check with \(10^6\) samples agrees to two decimal places.</p>
+<p><strong>Remediation.</strong> Fixing \(e_3\) now changes \(W_{e_3}\) to its sunk value 5, so \(R = \max(0.5 \cdot 7, 1 \cdot 5) = 5\): the full remediable reduction of 2. Fixing \(e_2\) alone leaves \(R = 7\), a reduction of 0. Fixing both also gives 5. The internet-facing channel \(e_3\) is the priority, even though \(e_2\) uses the older RSA key transport: what matters is where the vulnerable channel can be recorded.</p>
+
+<h3>10.2 TNFL: firmware signed under a read-only root</h3>
+<p>A fleet of field devices verifies firmware against a root key \(k_R\) (RSA-4096) burned into read-only memory, with no enforced expiry and a remaining fleet service life \(\Lambda = 20\). The root certifies a firmware-signing key \(k_F\) (ECDSA P-256) whose certificate has \(V = 3\) with enforced expiry, \(T_{\mathrm{mig}} = 2\), and \(D = 1\). Firmware has \(C = 1\) and \(A = 1\). Take \(\Tq = 10\).</p>
+<ul>
+  <li>\(\tau(k_F) = \min(3, 2 + 1, 20) = 3\), so \(S(k_F) = (3 - 10)^+ = 0\).</li>
+  <li>\(\tau(k_R) = \min(\infty, \infty, 20) = 20\), so \(S(k_R) = 10\).</li>
+  <li>\(R_{\mathrm{T}}(\text{firmware}) = 1 \cdot 1 \cdot \max(0, 10) = 10\). Under the uniform prior above, \(\E[S(k_R)] = \int_5^{20} F = 7.5\).</li>
+</ul>
+<p>The risk sits entirely in the anchor, which cannot be migrated in the field. Rotating \(k_F\) does nothing. The remedies are fleet replacement, or pre-provisioning a second, hash-based anchor (LMS or XMSS) on new devices together with a verifier policy that requires it.</p>
+</section>
+
+<section id="s11">
+<h2>11. Generalization and adjacent domains</h2>
+<h3>11.1 From quantum day to arbitrary sunsets</h3>
+<p>Nothing in §§5–8 depends on the cause of a break. Replacing \(\Tq\) with per-algorithm deadlines \(T_s(c)\), whether regulatory (NIST IR 8547's 2030 deprecation and 2035 disallowance, CNSA 2.0 dates) or cryptanalytic, turns the framework into a general crypto-agility model. Classical deprecations such as SHA-1 or TLS 1.0 are the case \(T_s \le 0\). Each primitive then carries its own break-time distribution, with dependence between them (all Shor-vulnerable primitives fall together; regulatory deadlines are deterministic).</p>
+<h3>11.2 Temporal graphs</h3>
+<p>A migration plan changes the graph over time. Representing configurations as a temporal graph, where each channel's stack is a piecewise-constant function of time, lets the exposure window be computed piecewise and makes "what-if" comparison of migration plans direct.</p>
+<h3>11.3 Adjacent domains</h3>
+<ul>
+  <li><strong>Software supply chain.</strong> Cryptographic libraries listed in an SBOM propagate their primitives to every binary that links them, so a vulnerable library version contributes channels and keys across the estate. The same reachability machinery applies to the dependency graph.</li>
+  <li><strong>Code signing and PKI.</strong> These are direct instances of the TNFL trust graph, including cross-certification cycles.</li>
+  <li><strong>IoT and operational technology.</strong> Long device lifetimes and anchors that cannot be updated make \(\tau\) equal to device service life, as in §10.2.</li>
+  <li><strong>Identity federation.</strong> SAML and OIDC signing keys, Kerberos, and SSH certificate authorities are trust anchors whose forgery compromises every relying service.</li>
+  <li><strong>Distributed ledgers.</strong> A public ledger is a permanent, fully observable record: \(O = 1\) and \(H\) equals the chain's age, so any confidential data on chain under Shor-vulnerable encryption has maximal HNDL exposure. For TNFL, spending an output or reusing an address reveals its public key, so those funds become forgeable once \(\Tq\) arrives. Migration requires protocol-level changes, and dormant keys whose owners never migrate have \(\tau = \infty\).</li>
+</ul>
+</section>
+
+<section id="s12">
+<h2>12. Limitations</h2>
+<ul>
+  <li><strong>Discovery completeness.</strong> The model covers only the observed estate. Air-gapped segments, shadow IT, and proprietary protocols may be missing, and missing channels make risk estimates low (Proposition 2).</li>
+  <li><strong>Flow precision.</strong> Inferred flows over-approximate (§6.4). Without data-class labels on write paths, scores are conservative and may misrank assets. On synthetic estates, the median overstatement ranges from none to 8.1 times, depending on how much of what they receive services forward (§13.9).</li>
+  <li><strong>Parameter subjectivity.</strong> \(C\), \(L\), \(O\), and \(\tfix\) come from catalogs and expert judgment. Rankings should be checked for sensitivity to them, not only to \(\Tq\). On synthetic estates, the first fix survives about 10% error in these parameters in most cases, but not 25% (§13.9).</li>
+  <li><strong>Aggregation.</strong> The maximum ignores multiplicity of exposure; the noisy-OR variant assumes independence. Neither is a calibrated loss model.</li>
+  <li><strong>Correlated failure.</strong> All Shor-vulnerable primitives fail together. Aggregating risk across assets as if failures were independent would understate tail risk.</li>
+  <li><strong>Opaque ciphertext.</strong> Field-level or application-layer encryption that discovery cannot classify is left unscored and flagged for manual review rather than given a default score.</li>
+  <li><strong>Out of scope.</strong> Implementation defects, side channels, and cryptanalytic breaks of PQC schemes are excluded except through the policy parameter of A6.</li>
+</ul>
+</section>
+
+<section id="s13">
+<h2>13. Testbed evaluation</h2>
+<p>We evaluate the discovery pipeline of §9 and the risk model of §§6–8 on a reproducible testbed: a small estate whose configuration is declared in advance, so discovery can be scored exactly. The goal is to check that the pipeline recovers what is deployed and that the model's outputs behave as the formal results predict on real handshakes. It does not test whether the model predicts real-world risk; §13.10 discusses this limit.</p>
+
+<h3>13.1 Setup</h3>
+<p>The estate mirrors Figure 1, extended with a second application service and a call cycle. Services are nginx 1.28 linked against OpenSSL 3.5.9, which supports ML-KEM and ML-DSA. A modern client (curl on OpenSSL 3.5) and a legacy client (curl on OpenSSL 1.1.1) send read requests through the gateway.</p>
+<div class="tbl"><table>
+<thead><tr><th>Listener</th><th>Declared key exchange</th><th>Certificate</th><th>Role</th></tr></thead>
+<tbody>
+<tr><td>gw:443</td><td>X25519MLKEM768, X25519, P-256; TLS 1.2 and 1.3</td><td>ECDSA P-256</td><td>Internet edge</td></tr>
+<tr><td>lb:8443</td><td>TLS 1.2, RSA key transport only</td><td>RSA-2048</td><td>Internal load balancer</td></tr>
+<tr><td>appa:9443</td><td>X25519 only, mutual TLS</td><td>ECDSA P-256</td><td>Application service</td></tr>
+<tr><td>appb:9444</td><td>X25519 only, mutual TLS</td><td>ECDSA P-256</td><td>Holds <em>profile</em>; calls back into appa (cycle)</td></tr>
+<tr><td>data:7443</td><td>X25519MLKEM768 only</td><td>ML-DSA-65</td><td>Holds <em>records</em></td></tr>
+</tbody>
+<caption>Table 4. Testbed listeners. The PKI has an RSA-4096 legacy root that is never rotated. It issues an ECDSA P-256 intermediate, which issues the leaf and firmware-signing certificates. A separate ML-DSA-65 root issues the data certificate.</caption>
+</table></div>
+<p>Two data classes are declared: <em>records</em> (origin data, \(C = 1\), \(L = 15\)) and <em>profile</em> (origin appb, \(C = 0.6\), \(L = 8\)). Observability is 1.0 for the internet hop, 0.5 for gateway to load balancer, 0.3 for load balancer to application, and 0.1 for the remaining internal hops. Remediation times are \(\tfix = 1\) for the edge and 2 elsewhere, and every channel has history \(H = 20\). These parameters are declared inputs, not measurements. Trust parameters follow §10.2: the legacy root has non-updatable verifiers with \(\Lambda = 20\), and the intermediate and firmware signer enforce expiry, with \(\tau = 3\).</p>
+<p>In each run, the modern client sends a request every second and the legacy client every 3 seconds. An active probe then runs from a separate vantage point. Telemetry comes from server access logs, which record the negotiated protocol, cipher and group, and from packet captures on every host. Discovery uses only handshakes and certificates; it never reads private keys or the declared configuration. We report three runs:</p>
+<ul>
+  <li><strong>Local.</strong> Docker on a single host, 120-second traffic window.</li>
+  <li><strong>Cloud.</strong> Six Hetzner Cloud servers (2 vCPU, Ubuntu 24.04), 15-minute traffic window. The five estate services each run on their own server and communicate over a private network. The clients reach the gateway over its public address, and a firewall admits only the client server. The probe runs from the client server's private address. Each host captures traffic on its own interfaces, and SSH key exchange is also probed.</li>
+  <li><strong>Local with an SSH plane.</strong> The local configuration, 120-second window, plus an SSH plane. The data service runs an SSH server, and backups of the <em>records</em> data are pulled over SSH by appb (OpenSSH 10.0) and by a legacy operations host (OpenSSH 8.6). This run reproduced every TLS-plane score of the first local run exactly.</li>
+</ul>
+
+<h3>13.2 Discovery accuracy</h3>
+<p>In both runs, across the five listeners, the probe recovered TLS versions, TLS 1.3 key-exchange groups, and TLS 1.2 cipher suites with precision 1.0 and recall 1.0 against the declared configuration. It identified the key and signature algorithms of all 5 served certificates and all 10 certificates in the artifact store, including the ML-DSA-65 root and leaf. From the CMS-signed firmware it extracted the signature algorithm (ECDSA with SHA-256) and the embedded signer chain. The estate is small and deliberately discoverable, so this result validates the pipeline rather than estimating recall in a real estate.</p>
+<p>The third run also enumerated TLS 1.2 ECDHE groups, with precision and recall 1.0: X25519 and P-256 on the gateway, none on the RSA-only load balancer. Doing this correctly needs care. In TLS 1.2, the client's supported-groups list also restricts the curves it accepts for an ECDSA certificate (RFC 8422). A probe that offers X25519 alone therefore fails against the gateway's P-256 certificate, although the server supports X25519 for key exchange. Our first probe made exactly this mistake and reported recall 0.5. The corrected probe offers each candidate group first and the certificate's curve second, then reads which group the server used for its ephemeral key. Inventory tools that test groups one at a time will under-report in the same way.</p>
+
+<h3>13.3 Supported versus negotiated</h3>
+<div class="tbl"><table>
+<thead><tr><th>Listener</th><th>Supported (probe)</th><th>Negotiated (local)</th><th>Negotiated (cloud)</th><th>Handshakes (local / cloud)</th></tr></thead>
+<tbody>
+<tr><td>gw:443</td><td>X25519MLKEM768, X25519, P-256</td><td>X25519MLKEM768 74%, X25519 26%</td><td>X25519MLKEM768 73%, X25519 27%</td><td class="n">477 / 3,291</td></tr>
+<tr><td>lb:8443</td><td>TLS 1.2 RSA key transport</td><td>AES256-GCM-SHA384 (RSA) 100%</td><td>AES256-GCM-SHA384 (RSA) 100%</td><td class="n">477 / 3,291</td></tr>
+<tr><td>appa:9443</td><td>X25519</td><td>X25519 100%</td><td>X25519 100%</td><td class="n">636 / 4,388</td></tr>
+<tr><td>appb:9444</td><td>X25519</td><td>X25519 100%</td><td>X25519 100%</td><td class="n">318 / 2,194</td></tr>
+<tr><td>data:7443</td><td>X25519MLKEM768</td><td>X25519MLKEM768 100%</td><td>X25519MLKEM768 100%</td><td class="n">159 / 1,097</td></tr>
+</tbody>
+<caption>Table 5. Supported versus negotiated key exchange in the local run (120 seconds) and the cloud run (15 minutes).</caption>
+</table></div>
+<p>The gateway supports hybrid key exchange, yet 26% of its handshakes in the local run and 27% in the cloud run negotiated classical X25519, all of them from the legacy client. An inventory that records only what a server supports would classify the edge as hybrid-protected. Under the worst-case reading of §6.6, that edge is the dominant HNDL exposure. Under the share-weighted reading, which uses the measured 26–27%, it is not (§13.4–13.5).</p>
+<p>Packet captures agreed with server telemetry on the negotiated groups of all six observed channels in both runs. In the cloud run that covered 14,261 captured handshakes. There, each host captured its own interfaces, and the gateway's client traffic arrived on its public address. Attributing those flows to channels required joining captures with the address inventory, mapping each public and private address to its host. Real estates need the same join wherever NAT or public addressing hides the internal identity of an endpoint.</p>
+
+<h3>13.4 HNDL risk</h3>
+<div class="tbl"><table>
+<thead><tr><th>Data class</th><th>Scenario</th><th>Local</th><th>Propagated</th><th>Sunk</th><th>Remediable</th><th>Propagated (share)</th><th>Sunk (share)</th></tr></thead>
+<tbody>
+<tr><td>records</td><td>\(\Tq = 5\)</td><td class="n">0.0</td><td class="n">11.0</td><td class="n">10.0</td><td class="n">1.0</td><td class="n">6.0</td><td class="n">5.0</td></tr>
+<tr><td>records</td><td>\(\Tq = 10\)</td><td class="n">0.0</td><td class="n">6.0</td><td class="n">5.0</td><td class="n">1.0</td><td class="n">3.5</td><td class="n">2.5</td></tr>
+<tr><td>records</td><td>\(\Tq = 15\)</td><td class="n">0.0</td><td class="n">1.0</td><td class="n">0.0</td><td class="n">1.0</td><td class="n">1.0</td><td class="n">0.0</td></tr>
+<tr><td>records</td><td>\(\Tq \sim U[5,20]\)</td><td class="n">0.0</td><td class="n">4.07</td><td class="n">3.33</td><td class="n">0.73</td><td class="n">2.40</td><td class="n">1.67</td></tr>
+<tr><td>profile</td><td>\(\Tq = 5\)</td><td class="n">0.30</td><td class="n">2.40</td><td class="n">1.80</td><td class="n">0.60</td><td class="n">1.50</td><td class="n">0.90</td></tr>
+<tr><td>profile</td><td>\(\Tq = 10\)</td><td class="n">0.0</td><td class="n">0.0</td><td class="n">0.0</td><td class="n">0.0</td><td class="n">0.0</td><td class="n">0.0</td></tr>
+<tr><td>profile</td><td>\(\Tq \sim U[5,20]\)</td><td class="n">0.05</td><td class="n">0.34</td><td class="n">0.18</td><td class="n">0.16</td><td class="n">0.25</td><td class="n">0.09</td></tr>
+</tbody>
+<caption>Table 6. HNDL risk computed from negotiated handshakes with labeled flows, under the worst-case reading (Definition 5) and the share-weighted reading (Definition 4′). The local and cloud runs gave identical values under both readings, and inferred flows gave the same values as labeled flows.</caption>
+</table></div>
+<ul>
+  <li><strong>Endpoint blindness.</strong> The records store negotiates only hybrid key exchange, so its local risk is zero, but its data crosses three Shor-vulnerable hops. Propagated risk is 6.0 at \(\Tq = 10\). This is the situation that endpoint-only inventories miss (Proposition 1).</li>
+  <li><strong>Sunk exposure dominates.</strong> At \(\Tq = 10\), 5.0 of the 6.0 is sunk. Under the uniform prior, 82% of the expected risk (3.33 of 4.07) is traffic already recorded, which no migration can recover (Lemma 1).</li>
+  <li><strong>Lifetime matters.</strong> Profile data, with \(L = 8\), carries risk only if a CRQC arrives early: 2.4 at \(\Tq = 5\) and none at \(\Tq = 10\).</li>
+  <li><strong>Inference over-approximates.</strong> Reachability inference added the appa↔appb channels created by the call cycle to the records flow, although records never traverse them. Scores were unchanged only because those channels have low observability; in general inferred flows can overstate risk (§6.4).</li>
+  <li><strong>Negotiation shares matter, traffic volume does not.</strong> The cloud run carried about seven times as many handshakes as the local run, yet every score is identical under both readings. The scores depend on which configurations each channel negotiates and, in the share-weighted reading, on their shares. Both were the same in the two runs. Under the share-weighted reading, the expected propagated risk of records falls from 4.07 to 2.40, and the sunk part from 3.33 to 1.67, because 73% of the edge's sessions are hybrid. The remediable part is unchanged at 0.73. The binding channel moves from the edge to the gateway-to-load-balancer link, all of whose sessions use RSA key transport. Both clients request every path, so the uniform-mixing assumption of §6.6 holds by construction: each path was classical in 26.8% of the gateway's sessions in the cloud run.</li>
+</ul>
+
+<h3>13.5 Remediation ranking</h3>
+<div class="tbl"><table>
+<thead><tr><th>Channel fixed now</th><th>Reduction (worst case)</th><th>Reduction (share-weighted)</th></tr></thead>
+<tbody>
+<tr><td>gw→client (edge)</td><td class="n">0.68</td><td class="n">0.00</td></tr>
+<tr><td>lb→gw</td><td class="n">0.03</td><td class="n">0.73</td></tr>
+<tr><td>both</td><td class="n">0.80</td><td class="n">0.73</td></tr>
+<tr><td>any other channel</td><td class="n">0.00</td><td class="n">0.00</td></tr>
+</tbody>
+<caption>Table 7. Reduction in expected total risk (both data classes, \(\Tq \sim U[5,20]\)) from fixing channels immediately. Both runs gave the same values.</caption>
+</table></div>
+<p>The two readings rank the channels in opposite orders:</p>
+<ul>
+  <li><strong>Worst-case reading: the edge first.</strong> Some records cross the edge under classical X25519, and it is the most observable channel.</li>
+  <li><strong>Share-weighted reading: the link behind the edge first.</strong> All of the link's sessions use RSA key transport, while 73% of the edge's sessions are already hybrid, so the link carries more exposed traffic. Fixing the edge alone gains nothing under this reading, because the link remains the maximum.</li>
+</ul>
+<p>Which reading applies depends on the data class (§6.6): the worst case for credentials and keys, the share-weighted reading for bulk records. In §10.1, every channel negotiates a single configuration, and priority follows where a vulnerable channel can be recorded rather than which algorithm looks oldest. Here, with measured shares, the share-weighted reading puts the oldest configuration first, because it also carries the most exposed traffic. A ranking computed from supported configurations alone could not show this.</p>
+<p>The joint row also shows Proposition 8 on measured data. Under the worst-case reading, fixing both channels reduces risk by 0.80, more than the 0.68 + 0.03 from fixing each alone. Ranking channels by their value when fixed alone understates the link: its marginal value rises from 0.03 to 0.12 once the edge is fixed.</p>
+
+<h3>13.6 TNFL</h3>
+<p>The intermediate and firmware-signing keys have acceptance horizons of 3 years, so their forgery windows are zero under the uniform prior. The RSA-4096 root has \(\tau = 20\) and an expected forgery window of 7.5 years. The firmware's TNFL risk of 7.5 comes entirely from the root, which matches the analysis of §10.2. Both runs gave the same values.</p>
+
+<h3>13.7 Sensitivity to post-quantum breaks</h3>
+<p>Assumption A6 sets \(T_{\mathrm{PQ}} = \infty\). Table 8 replaces it with a fixed break time \(T_{\mathrm{PQ}}\) for both ML-KEM and ML-DSA, keeping \(\Tq \sim U[5,20]\).</p>
+<div class="tbl"><table>
+<thead><tr><th>\(T_{\mathrm{PQ}}\)</th><th>records (worst)</th><th>records (share)</th><th>profile (worst)</th><th>profile (share)</th><th>\(S\)(ML-DSA root)</th><th>\(S\)(RSA root)</th></tr></thead>
+<tbody>
+<tr><td>\(\infty\) (A6)</td><td class="n">4.07</td><td class="n">2.40</td><td class="n">0.34</td><td class="n">0.25</td><td class="n">0.0</td><td class="n">7.5</td></tr>
+<tr><td>20</td><td class="n">4.07</td><td class="n">2.40</td><td class="n">0.34</td><td class="n">0.25</td><td class="n">0.0</td><td class="n">7.5</td></tr>
+<tr><td>15</td><td class="n">4.07</td><td class="n">2.40</td><td class="n">0.34</td><td class="n">0.25</td><td class="n">5.0</td><td class="n">7.5</td></tr>
+<tr><td>10</td><td class="n">4.07</td><td class="n">3.46</td><td class="n">0.34</td><td class="n">0.25</td><td class="n">10.0</td><td class="n">7.5</td></tr>
+<tr><td>5</td><td class="n">4.07</td><td class="n">4.07</td><td class="n">0.34</td><td class="n">0.34</td><td class="n">15.0</td><td class="n">7.5</td></tr>
+</tbody>
+<caption>Table 8. Expected propagated HNDL risk and expected forgery window \(S\) (years) as the post-quantum break time varies, for the cloud run. The local run differs only in records (share) at \(T_{\mathrm{PQ}} = 10\), which is 3.45 because its classical share at the edge was 26%.</caption>
+</table></div>
+<ul>
+  <li><strong>The worst-case reading does not move.</strong> Both flows cross channels that negotiate classical key exchange: the RSA link, and the legacy sessions at the edge. By Lemma 2, a hybrid is never more exposed than its classical part, so a post-quantum break adds HNDL exposure only where a hybrid is the only protection.</li>
+  <li><strong>The share-weighted reading does.</strong> Expected risk for records rises from 2.40 to 3.46 at \(T_{\mathrm{PQ}} = 10\). At \(T_{\mathrm{PQ}} = 5\), every hybrid session breaks together with \(\Tq\), and the value reaches the worst-case 4.07. The hybrid sessions at the edge lose their protection as \(T_{\mathrm{PQ}}\) falls into the range of \(\Tq\), as Corollary 1 predicts.</li>
+  <li><strong>The ML-DSA root becomes the largest TNFL risk.</strong> It is a pure post-quantum signature with no enforced expiry, so \(S = \pos{20 - T_{\mathrm{PQ}}}\). Below \(T_{\mathrm{PQ}} = 12.5\) it overtakes the RSA root. A composite root that requires both an ML-DSA and a classical signature would break at \(\max(\Tq, T_{\mathrm{PQ}})\) (Rule H). By the argument of Lemma 2, its forgery window would be no larger than either component's.</li>
+</ul>
+
+<h3>13.8 SSH key exchange</h3>
+<p>The probe enumerated the SSH key-exchange algorithms offered by all five estate servers. Every server offers the hybrid sntrup761x25519-sha512 first, followed by classical X25519, NIST-curve ECDH and finite-field Diffie–Hellman. This is the default of the distribution's OpenSSH, not a testbed choice. None of the servers offers mlkem768x25519-sha256, the hybrid based on the standardized ML-KEM, because that version of OpenSSH predates it. For migration, this means the SSH channels are offered a post-quantum hybrid, but one based on a lattice KEM that has not been standardized, while the classical options remain available to any client that does not ask for it. As with TLS, the probe records only what is offered; which algorithm is negotiated depends on each client.</p>
+<p>The SSH plane of the third run measures negotiation directly. SSH sends its key-exchange offers (KEXINIT) unencrypted, so captures show both lists, and the negotiated algorithm is the first client algorithm the server also offers (RFC 4253, §7.1). The data server offered ML-KEM and sntrup761 hybrids, X25519 and P-256, and the probe recovered that list with precision and recall 1.0.</p>
+<div class="tbl"><table>
+<thead><tr><th>Channel</th><th>Client</th><th>Negotiated key exchange</th><th>Connections</th></tr></thead>
+<tbody>
+<tr><td>data→appb</td><td>OpenSSH 10.0</td><td>mlkem768x25519-sha256 (100%)</td><td class="n">24</td></tr>
+<tr><td>data→ops</td><td>OpenSSH 8.6</td><td>curve25519-sha256 (100%)</td><td class="n">18</td></tr>
+</tbody>
+<caption>Table 9. Negotiated SSH key exchange on the SSH plane, from captured KEXINIT messages. The SSH server's debug log records the same totals (24 ML-KEM, 18 X25519), but its lines carry no connection identifier, so per-channel attribution comes from the captures.</caption>
+</table></div>
+<p>The pattern of §13.3 repeats. The server supports a standardized hybrid, but the legacy client negotiates classical key exchange on every connection. Scored as its own data class (\(C = 1\), \(L = 15\), with \(O = 0.1\) for appb and 0.3 for the operations host), the exported records carry an expected risk of 1.69, of which 1.0 is sunk. All of it comes from the operations host's channel. Upgrading that one client, or removing classical key exchange from the server's list, recovers the remediable 0.69. The SSH plane is scored separately so that the TLS-plane results of §13.4–13.7 stay comparable across runs. The cloud run did not include it.</p>
+
+<h3>13.9 Synthetic topologies</h3>
+<p>The testbed has six channels. To test the model at scale, a generator builds layered service estates: an internet client, a gateway layer, and four further layers, in which each service calls three services below it. Callbacks into upper layers create cycles.</p>
+<ul>
+  <li><strong>Channels.</strong> Each channel is classical, hybrid, mixed (classical share drawn from 5–50%) or, rarely, classically broken, and the internet edge is mostly mixed. Observability, remediation time and history follow tiers like the testbed's.</li>
+  <li><strong>Data classes.</strong> Classes originate in the deepest layer and in some middle services, with lifetimes from 2 to 25 years.</li>
+  <li><strong>Flows.</strong> A service that holds a class forwards it along each of its outgoing channels with probability \(f\), and every origin forwards on at least one channel. This makes \(f\) control how much of the reachable graph a class actually uses, and makes labeled flows subsets of inferred ones by construction.</li>
+</ul>
+<p>Estates have 200 services unless stated. All runs are seeded and use a 201-point quantile grid for \(\Tq\). On the testbed, this grid differs from the scorer's 3001-point grid by at most 0.0005.</p>
+<p><strong>Validation.</strong> Given the testbed's logs, the synthetic risk engine reproduces Tables 6 and 7 exactly for both runs, including the joint-fix value of 0.80. On 1,000 random graphs with up to 30 nodes and cycles, the condensation algorithm of Appendix A, naive fixpoint iteration and brute-force reachability returned identical values. These are checks of the code; Propositions 4 and 7 are proved.</p>
+<p><strong>Scaling.</strong> On random graphs with three channels per service, the algorithm of Appendix A takes 1.2 ms for 1,000 services and 0.31 s for 100,000 services and 300,000 channels (one lifespan tier and one realization of \(\Tq\), Python). The log-log slope is 1.21. The algorithm is linear, so we attribute the excess over 1 to memory effects in the implementation. Naive iteration on a chain processed in adversarial order needs \(|V_A|\) rounds: 0.36 s for 2,000 services against 1.5 ms for condensation, growing quadratically.</p>
+<div class="tbl"><table>
+<thead><tr><th>Callbacks per service</th><th>Forwarding \(f\)</th><th>Precision (median, IQR)</th><th>\(R_{\text{inferred}} / R_{\text{labeled}}\) (median)</th><th>Ratio (90th percentile)</th></tr></thead>
+<tbody>
+<tr><td>0</td><td>0.25</td><td class="n">0.12 (0.06–0.24)</td><td class="n">3.7</td><td class="n">23</td></tr>
+<tr><td>0</td><td>0.50</td><td class="n">0.29 (0.18–0.48)</td><td class="n">2.3</td><td class="n">12</td></tr>
+<tr><td>0</td><td>0.75</td><td class="n">0.60 (0.44–0.78)</td><td class="n">1.0</td><td class="n">3.7</td></tr>
+<tr><td>0.05</td><td>0.25</td><td class="n">0.05 (0.03–0.14)</td><td class="n">4.9</td><td class="n">42</td></tr>
+<tr><td>0.05</td><td>0.50</td><td class="n">0.16 (0.07–0.32)</td><td class="n">2.9</td><td class="n">23</td></tr>
+<tr><td>0.05</td><td>0.75</td><td class="n">0.47 (0.27–0.67)</td><td class="n">1.2</td><td class="n">5.4</td></tr>
+<tr><td>0.2</td><td>0.25</td><td class="n">0.01 (0.01–0.03)</td><td class="n">8.1</td><td class="n">81</td></tr>
+<tr><td>0.2</td><td>0.50</td><td class="n">0.05 (0.02–0.13)</td><td class="n">3.4</td><td class="n">39</td></tr>
+<tr><td>0.2</td><td>0.75</td><td class="n">0.48 (0.24–0.61)</td><td class="n">1.0</td><td class="n">4.8</td></tr>
+<tr><td>any</td><td>1.00</td><td class="n">1.00</td><td class="n">1.0</td><td class="n">1.0</td></tr>
+</tbody>
+<caption>Table 10. Inferred flows (§6.4) against labeled flows: precision is \(|\Ch(d)| / |\widehat{\Ch}(d)|\); the ratio compares worst-case propagated risk. Each row pools 40 estates (about 2,500 data classes). Classes with zero labeled risk are excluded from the ratio, between 226 and 897 per row, for example classes whose paths are all hybrid.</caption>
+</table></div>
+<p><strong>Inference.</strong> Precision falls as services forward less of what they receive and as callbacks multiply: with callbacks from 20% of services and \(f = 0.25\), the median inferred flow is 77 times larger than the labeled one. Inference never under-reports: the smallest ratio over all data classes was exactly 1, as §6.4 guarantees. When services forward everything, it is exact. But the median risk overstatement reaches 8.1 times, and the 90th percentile 81 times. For high-criticality classes, labels are worth the effort of obtaining them.</p>
+<div class="tbl"><table>
+<thead><tr><th>Change from the base setting</th><th>Same first fix</th><th>Top-5 overlap</th><th>Weighted \(\tau\) (median)</th></tr></thead>
+<tbody>
+<tr><td>Parameter noise \(\sigma = 0.1\)</td><td class="n">83%</td><td class="n">0.84</td><td class="n">0.85</td></tr>
+<tr><td>Parameter noise \(\sigma = 0.25\)</td><td class="n">57%</td><td class="n">0.61</td><td class="n">0.66</td></tr>
+<tr><td>Parameter noise \(\sigma = 0.5\)</td><td class="n">23%</td><td class="n">0.37</td><td class="n">0.39</td></tr>
+<tr><td>Parameter noise \(\sigma = 1\)</td><td class="n">7%</td><td class="n">0.13</td><td class="n">−0.01</td></tr>
+<tr><td>Prior: lognormal, median 12</td><td class="n">100%</td><td class="n">0.97</td><td class="n">0.97</td></tr>
+<tr><td>Prior: point mass at 10</td><td class="n">90%</td><td class="n">0.84</td><td class="n">0.87</td></tr>
+<tr><td>Prior: early, \(5 + \mathrm{Exp}(\text{mean } 4)\)</td><td class="n">77%</td><td class="n">0.82</td><td class="n">0.88</td></tr>
+<tr><td>Prior: late, \(U[10,30]\)</td><td class="n">67%</td><td class="n">0.75</td><td class="n">0.79</td></tr>
+<tr><td>Share-weighted instead of worst-case reading</td><td class="n">53%</td><td class="n">0.57</td><td class="n">0.48</td></tr>
+</tbody>
+<caption>Table 11. Stability of the fix-one-channel ranking (worst-case reading, \(\Tq \sim U[5,20]\)) over 30 estates. Noise multiplies \(O\), \(\tfix\), \(H\) and \(L\) by independent \(e^{\sigma Z}\), with \(O\) clipped to \([0, 1]\), and uses 5 draws per estate. Weighted \(\tau\) (Vigna's) is computed over channels with a non-zero gain in either ranking, because most channels tie at zero. The priors are illustrative shapes, not fits to expert surveys.</caption>
+</table></div>
+<p><strong>Rank stability.</strong> Three results stand out:</p>
+<ul>
+  <li><strong>From 25% upward, parameter error matters more than the prior's shape.</strong> The first fix survives about 10% error in the declared parameters in 83% of cases, 25% error in 57%, and 50% error in 23%. Where parameters are known only to within about 50%, a single ranking is not meaningful, and rankings should be reported as ranges or computed as expected gains over the parameter uncertainty.</li>
+  <li><strong>Only a late arrival changes the prior's effect much.</strong> Changing the shape of the arrival prior matters less than parameter error, except for a late prior, which moves exposure toward long-lived data.</li>
+  <li><strong>The two readings of §6.6 disagree often.</strong> They choose different first fixes in 47% of estates. The reversal of §13.5 is not an isolated case, so choosing the reading per data class is a substantive decision.</li>
+</ul>
+<div class="tbl"><table>
+<thead><tr><th>Reading, budget</th><th>Greedy: share of instances with a gap</th><th>Greedy: worst ratio</th><th>Group-aware: share with a gap</th><th>Group-aware: worst ratio</th></tr></thead>
+<tbody>
+<tr><td>worst case, \(k = 2\)</td><td class="n">4.7%</td><td class="n">0.36</td><td class="n">3.4%</td><td class="n">0.36</td></tr>
+<tr><td>worst case, \(k = 3\)</td><td class="n">11.4%</td><td class="n">0.44</td><td class="n">8.7%</td><td class="n">0.66</td></tr>
+<tr><td>share-weighted, \(k = 2\)</td><td class="n">4.7%</td><td class="n">0.36</td><td class="n">4.0%</td><td class="n">0.36</td></tr>
+<tr><td>share-weighted, \(k = 3\)</td><td class="n">8.7%</td><td class="n">0.37</td><td class="n">6.7%</td><td class="n">0.37</td></tr>
+</tbody>
+<caption>Table 12. Greedy and the group-aware heuristic of §8.2 against the optimal fix set found by exhaustive search, on 150 small estates (16–24 channels), 149 of which have a positive optimum. Ratios are achieved over optimal risk reduction. With \(k = 1\), both heuristics are optimal. Greedy breaks ties by larger remediable exposure, then by index. With ties broken by index alone, the worst ratio at \(k = 3\) drops to 0.26.</caption>
+</table></div>
+<p><strong>Greedy against optimal.</strong> The complementarity of Proposition 8 occurs in practice:</p>
+<ul>
+  <li><strong>Greedy falls short.</strong> Greedy selection misses the optimum in up to 11% of instances, by as much as 64%.</li>
+  <li><strong>The group-aware heuristic helps, but does not close the gap.</strong> It reduces how often a shortfall occurs and the average shortfall: its mean ratio is 0.984–0.991, against 0.976–0.984 for greedy. Its worst case improves only for the worst-case reading at \(k = 3\), from 0.44 to 0.66.</li>
+  <li><strong>Exhaustive search is practical when the candidate set is small.</strong> Its cost grows as \(|E|^k\), so it suits small estates, or estates pruned to the channels with remediable exposure. Otherwise, the group-aware heuristic is the better default.</li>
+</ul>
+
+<h3>13.10 Threats to validity and next steps</h3>
+<ul>
+  <li><strong>Construct validity.</strong> The testbed, the synthetic generator and the model were designed by the same author. The evaluation shows that the pipeline recovers the deployed configuration and that the implementation behaves as the formal results predict, and §13.9 shows how the model behaves on estates built from the author's assumptions. It does not show that the model's scores track real-world risk.</li>
+  <li><strong>External validity.</strong> The estate is small, synthetic and deterministic. Observability and the other model parameters are declared, not measured. The cloud run adds separate hosts, real network segments and a public edge, but it uses the same software and traffic as the local run, so the agreement of the two runs shows that the results are reproducible, not that they generalize.</li>
+  <li><strong>Coverage.</strong> IPsec is not exercised. SSH negotiation and TLS 1.2 groups were measured in a local run only, and the SSH plane is scored as a separate data class rather than merged into the flows of §13.4.</li>
+</ul>
+<p>The next step is a production case study: measure observability and lifetimes where possible, and compare the model's ranking with independent expert prioritization using Kendall's \(\tau\). Table 11 indicates how accurately the parameters must be known for such a comparison to be informative.</p>
+<p>The testbed's Terraform and container configuration, ground truth, probe, and scorer are released with this paper, together with the synthetic generator and experiments of §13.9. A local run takes about two minutes. A cloud run takes about 30 minutes plus provisioning, and costs well under one euro at hourly server rates.</p>
+</section>
+
+<section id="s14">
+<h2>14. Conclusion</h2>
+<p>Cryptographic risk in an enterprise is a property of how primitives compose along data flows and trust chains, not of individual endpoints. Treating classification as break times, measuring HNDL exposure as a window of recorded traffic, and modeling TNFL separately through how long keys stay accepted together give a model that reduces to Mosca's inequality where it should, distinguishes losses that are already sunk from those migration can prevent, and propagates each threat in its own direction. The propagation is well defined on cyclic graphs and runs in linear time per lifespan tier. Remediation selection is hard in general, but the model exposes the structure that practical heuristics need. A testbed evaluation, run on one host and on six cloud servers (§13), shows three things. Discovery recovers the deployed configuration. The model separates endpoint-safe from flow-exposed data on real handshakes. And what is negotiated, not what is supported, determines exposure, in TLS and in SSH: weighting exposure by measured negotiation shares (§6.6) changes which channel should be fixed first. On synthetic estates, propagation scales linearly, rankings need parameters accurate to about 10%, and the choice between the two readings changes the first fix in about half of the estates. The next step is a production case study.</p>
+<p class="small"><strong>Implementation note.</strong> The framework informs the architecture of Dytallix's QuantumSentinel platform, which implements multi-source discovery, graph construction, classification against NIST standards, and evidence-linked CycloneDX CBOM output. Automated extraction of \(L(d)\) and data-class labels remains an open engineering problem.</p>
+</section>
+
+<section id="decl">
+<h2>Declarations</h2>
+<ul>
+  <li><strong>Data and code availability.</strong> The testbed is released at <a href="https://github.com/exocognosis/PQC-topology">https://github.com/exocognosis/PQC-topology</a>. It contains the Terraform and container configuration, the ground truth, the probe, the scorer, the report, scores and CBOM of every run, the synthetic generator and experiments of §13.9, and the property tests. The Lean development of Appendix D is released with it. All runs are seeded or reproducible from the released configuration.</li>
+  <li><strong>Ethics.</strong> All probing and generated traffic targeted only infrastructure created for this study: local containers, and servers in a dedicated Hetzner Cloud project. No third-party systems were scanned. All keys and certificates are throwaway test material.</li>
+</ul>
+</section>
+
+<section id="refs">
+<h2>References</h2>
+<ol class="refs">
+  <li>Ajith, V., Ibrahim, M., &amp; Haroon, M. S. (2026). Topology-driven symbolic verification of post-quantum migration paths using Tamarin Prover. <em>IACR Cryptology ePrint Archive</em>, Paper 2026/819.</li>
+  <li>Alam, S. (2026). Quantum-ready secure WAN: A risk assessment and migration framework. arXiv:2609.26225.</li>
+  <li>Beullens, W. (2022). Breaking Rainbow takes a weekend on a laptop. <em>CRYPTO 2022</em>.</li>
+  <li>Bhargavan, K., &amp; Leurent, G. (2016). On the practical (in-)security of 64-bit block ciphers. <em>ACM CCS 2016</em>.</li>
+  <li>Carré, B. (1979). <em>Graphs and Networks</em>. Oxford University Press.</li>
+  <li>Castryck, W., &amp; Decru, T. (2023). An efficient key recovery attack on SIDH. <em>EUROCRYPT 2023</em>.</li>
+  <li>CycloneDX. (2024). <em>CycloneDX Specification v1.6</em>, including the Cryptographic Bill of Materials. OWASP Foundation. Later versions extend it.</li>
+  <li>Erlemann, R., Morris, C. C., &amp; Sathe, S. (2026). Full-stack knowledge graph and LLM framework for post-quantum cyber readiness. arXiv:2601.03504.</li>
+  <li>Figueira, L. de O., Duarte, L. O., &amp; Silva, R. L. (2026). Prioritizing post-quantum migration in synthetic cryptographic inventories with machine learning and QUBO optimization. In <em>Anais Estendidos do XXVI Simpósio Brasileiro de Cibersegurança (SBSeg)</em>, pp. 843–849. SBC. doi:10.5753/sbseg_estendido.2026.30625.</li>
+  <li>Goldschmidt, O., Nehme, D., &amp; Yu, G. (1994). Note: On the set-union knapsack problem. <em>Naval Research Logistics</em>, 41(6).</li>
+  <li>Gondrom, T., Brandner, R., &amp; Pordesch, U. (2007). <em>Evidence Record Syntax (ERS)</em>. RFC 4998.</li>
+  <li>Grigaliūnas, Š., &amp; Brūzgienė, R. (2025). Towards a unified quantum risk assessment. <em>Electronics</em>, 14(17), 3338. doi:10.3390/electronics14173338.</li>
+  <li>Grover, L. K. (1996). A fast quantum mechanical algorithm for database search. <em>STOC 1996</em>.</li>
+  <li>Gupta, A., &amp; Mittal, S. (2026). Post-quantum readiness and cryptographic transition planning for enterprise cloud. <em>Cybersecurity</em>, 9(1), 147. doi:10.1186/s42400-026-00579-2.</li>
+  <li>Hasan, K. F., Simpson, L., Baee, M. A. R., Islam, C., Rahman, Z., Armstrong, W., Gauravaram, P., &amp; McKague, M. (2024). A framework for migrating to post-quantum cryptography: Security dependency analysis and case studies. <em>IEEE Access</em>. doi:10.1109/ACCESS.2024.3360412. arXiv:2307.06520.</li>
+  <li>Lenstra, J. K., &amp; Rinnooy Kan, A. H. G. (1978). Complexity of scheduling under precedence constraints. <em>Operations Research</em>, 26(1).</li>
+  <li>Loebenberger, D., Gazdag, S.-L., Herzinger, D., Hirsch, E., Näther, C., &amp; Steghöfer, J.-P. (2024). On the formalization of cryptographic migration. arXiv:2408.05997 (revised 2025).</li>
+  <li>Mohri, M. (2002). Semiring frameworks and algorithms for shortest-distance problems. <em>Journal of Automata, Languages and Combinatorics</em>, 7(3).</li>
+  <li>Mosca, M. (2018). Cybersecurity in an era with quantum computers: Will we be ready? <em>IEEE Security &amp; Privacy</em>, 16(5). Preprint: IACR ePrint 2015/1075.</li>
+  <li>Mosca, M., &amp; Mulholland, J. (2017). <em>A Methodology for Quantum Risk Assessment</em>. Global Risk Institute.</li>
+  <li>Mosca, M., &amp; Piani, M. <em>Quantum Threat Timeline Report</em>. Global Risk Institute (annual).</li>
+  <li>National Institute of Standards and Technology, NCCoE. <em>SP 1800-38: Migration to Post-Quantum Cryptography</em>.</li>
+  <li>National Institute of Standards and Technology. (2020). <em>SP 800-208: Recommendation for Stateful Hash-Based Signature Schemes</em>.</li>
+  <li>National Institute of Standards and Technology. (2024). <em>FIPS 203, 204, 205</em>: ML-KEM, ML-DSA, SLH-DSA.</li>
+  <li>National Institute of Standards and Technology. (2024). <em>IR 8547 (Initial Public Draft): Transition to Post-Quantum Cryptography Standards</em>.</li>
+  <li>National Security Agency. (2022). <em>Commercial National Security Algorithm Suite 2.0</em>.</li>
+  <li>Ou, X., Govindavajhala, S., &amp; Appel, A. W. (2005). MulVAL: A logic-based network security analyzer. <em>USENIX Security 2005</em>.</li>
+  <li>Poolsappasit, N., Dewri, R., &amp; Ray, I. (2012). Dynamic security risk management using Bayesian attack graphs. <em>IEEE TDSC</em>, 9(1).</li>
+  <li>Rescorla, E. (2018). <em>The Transport Layer Security (TLS) Protocol Version 1.3</em>. RFC 8446.</li>
+  <li>Rufino, M., Marcelino, R. D., &amp; Garcia, J. S. (2026). A formal basis for quantum cryptographic exposure measurement under HNDL threat. arXiv:2605.22569.</li>
+  <li>Shaw, A. (2026). Cost of delay for post-quantum migration: Putting classical and harvest-now-decrypt-later risk on one ordered list. arXiv:2610.09029.</li>
+  <li>Sheyner, O., Haines, J., Jha, S., Lippmann, R., &amp; Wing, J. M. (2002). Automated generation and analysis of attack graphs. <em>IEEE S&amp;P 2002</em>.</li>
+  <li>Shor, P. W. (1997). Polynomial-time algorithms for prime factorization and discrete logarithms on a quantum computer. <em>SIAM Journal on Computing</em>, 26(5).</li>
+  <li>Tarjan, R. E. (1972). Depth-first search and linear graph algorithms. <em>SIAM Journal on Computing</em>, 1(2).</li>
+</ol>
+</section>
+
+<section id="appA">
+<h2>Appendix A. Propagation algorithm</h2>
+<pre>input:  channel graph (V_A, E_ch); edge values ω(e) for one lifespan tier
+        and one realization (or quadrature node) of T_Q
+output: X(u) = max ω over channels whose tail is reachable from u
+
+1. Run Tarjan's algorithm; it emits SCCs S_1 … S_r in reverse
+   topological order (sinks first).
+2. for i = 1 … r:
+       val[S_i] ← max( { ω(e) : tail(e) ∈ S_i } ∪ {0} )
+       for each channel e = (x → y) with x ∈ S_i, comp(y) ≠ S_i:
+           val[S_i] ← max(val[S_i], val[comp(y)])
+3. for each u: X(u) ← val[comp(u)]
+
+TNFL ancestor maxima: run the same procedure on the reversed
+trust graph with vertex values S(k).</pre>
+<p>Each vertex and edge is processed a constant number of times, giving \(O(|V_A| + |E_{\mathrm{ch}}|)\) per tier and quadrature node.</p>
+</section>
+
+<section id="appB">
+<h2>Appendix B. Proofs</h2>
+<div class="env proof">
+<p><span class="lab">Lemma 1.</span> (1) If \(-H_e \le T_e - L\), the inner maximum is \(T_e - L\), so \(W = (\tfix + L - T_e)^+\). (2) Setting \(\tfix = 0\) gives \(\pos{-\max(-H, T - L)} = \pos{\min(H, L - T)}\). (3) Let \(m = \max(-H, T - L)\). If \(m \le 0\), then \(W = \tfix - m \ge \tfix\) and \(W^0 = -m\), so \(W - W^0 = \tfix = \min(\tfix, W)\). If \(m \gt 0\), then \(W^0 = 0\) and \(W = (\tfix - m)^+ \le \tfix\), so \(W - W^0 = W = \min(\tfix, W)\). (4) \(T_e = \infty\) makes \(m = \infty\). ∎</p>
+<p><span class="lab">Lemma 2.</span> \(W\) is non-increasing in \(T\) (Proposition 2). If \(T_1 \le T_2\), then \(\max\{T_1, T_2\} = T_2\) and \(W(T_2) \le W(T_1)\), so \(W(T_2) = \min\{W(T_1), W(T_2)\}\). The case \(T_2 \le T_1\) and the statement for \(\min\) are symmetric. ∎</p>
+<p><span class="lab">Proposition 1.</span> \(\Ch_{\mathrm{loc}}(d) \subseteq \Ch(d)\), the maximum over a superset is at least the maximum over the subset for every realization, and expectation preserves the inequality. ∎</p>
+<p><span class="lab">Proposition 2.</span> \(W_e(d)\) is non-decreasing in \(\tfix\), \(H\), and \(L\) and non-increasing in \(T_e\), because \(\max\) and \([\cdot]^+\) are monotone. Products with non-negative \(O\) and \(C\), maxima, and expectations preserve monotonicity. Adding a channel enlarges the set over which the maximum is taken. ∎</p>
+<p><span class="lab">Proposition 3.</span> \(R(d) = 0\) if and only if \(O(e)\,W_e(d) = 0\) almost surely for every \(e \in \Ch(d)\). \(W_e(d) = 0\) if and only if \(\tfix \le \max(-H, T_e - L)\), that is, \(\tfix + H = 0\) or \(T_e \ge \tfix + L\). A layer stack containing a post-quantum or correctly bound hybrid layer has \(T_e = \infty\) by Definition 3. ∎</p>
+<p><span class="lab">Proposition 4.</span> Values lie in the finite set \(\{\omega(e)\} \cup \{0\}\), ordered by \(\le\), and the update is monotone, so Kleene iteration from 0 reaches the least fixpoint (Knaster–Tarski). By induction on iterations, the value at \(u\) is the maximum of \(\omega\) over channels whose tail is reachable from \(u\); vertices in one strongly connected component reach the same set, so values agree. The condensation recurrence computes exactly this maximum, by induction in reverse topological order. ∎</p>
+<p><span class="lab">Proposition 5.</span> Tarjan's algorithm and the pass of Appendix A are linear; they are repeated once per lifespan tier and quadrature node. ∎</p>
+<p><span class="lab">Proposition 6.</span> With \(H \ge L\), \(W = (a - \Tq)^+\) by Lemma 1 for every \(\Tq \ge 0\). For a non-negative random variable \(T\), \(\E[(a - T)^+] = \int_0^a \Pr[T \le s]\,ds\) by the layer-cake identity. \(\Pr[W \gt 0] = \Pr[\Tq \lt a] = F(a)\) for continuous \(F\). The sunk case is \(a = L\). ∎</p>
+<p><span class="lab">Corollary 1.</span> Let \(T = \max(\Tq, T_{\mathrm{PQ}}) \ge 0\). As in Proposition 6, \(W = (a - T)^+\), and \(\E[(a - T)^+] = \int_0^a \Pr[T \le s]\,ds\). Here \(\Pr[T \le s] = \Pr[\Tq \le s, T_{\mathrm{PQ}} \le s]\), which is \(F(s)\,G(s)\) under independence and lies between the Fréchet–Hoeffding bounds \(\pos{F(s) + G(s) - 1}\) and \(\min\{F(s), G(s)\}\) in general; the upper bound is attained by the comonotone coupling. Values \(T = \infty\) contribute zero. The post-quantum-only case is \(T = T_{\mathrm{PQ}}\). ∎</p>
+<p><span class="lab">Proposition 7.</span> (a) With \(q_e(k_0) = 1\), the sum has one non-zero term. (b) Terms with \(T_{e,k} = \infty\) vanish by Lemma 1(4). (c) Each \(W_{e,k} \le W_{e}\) evaluated at the earliest break time, by monotonicity of \(W\) in \(T\), and a convex combination of values bounded by \(M\) is bounded by \(M\); the bound passes through \(O\), the maximum and the expectation. (d) As for Propositions 1 and 2, since \(\overline{W}_e\) is a non-negative combination of windows that are monotone in each parameter. (e) A sum of non-negative terms vanishes if and only if each term does. (f) Apply Lemma 1(3) to each term and use linearity of the sum. ∎</p>
+</div>
+</section>
+
+<section id="appD">
+<h2>Appendix D. Machine-checked results</h2>
+<p>Results marked <span class="tag t-good">Lean</span> are formalized in the file <code>TopoPQC.lean</code>, checked with Lean 4 (toolchain v4.34.1) and Mathlib (revision <code>d13f23b723</code>). Break times are elements of \(\mathbb{R} \cup \{\top\}\) (<code>WithTop ℝ</code>), with \(\top\) for channels that are never broken. Risk is formalized for one realization of \(\Tq\), and, for Propositions 1–3, also as a Lebesgue integral over an arbitrary measure on realizations. Proposition 6 and Corollary 1 are stated for measurable, non-negative break times under an arbitrary measure. The file contains no <code>sorry</code>, no added axioms, and no <code>native_decide</code>, and every theorem depends only on Lean's standard axioms (<code>propext</code>, <code>Classical.choice</code>, <code>Quot.sound</code>).</p>
+<p>A property-based test suite (<code>testbed/tests</code>, using Hypothesis) checks the statement of each formalized result on random inputs against the testbed scorer and the synthetic engine, so the code that produces §13's numbers is tested against the proved statements. Deliberately introduced errors in the window, the share-weighted reading, and the condensation algorithm are each caught by the suite.</p>
+<div class="tbl"><table>
+<thead><tr><th>Paper result</th><th>Lean theorem</th><th>Scope</th></tr></thead>
+<tbody>
+<tr><td>Lemma 1(1)</td><td><code>lemma1_mosca</code>, <code>lemma1_mosca_iff</code></td><td>Full</td></tr>
+<tr><td>Lemma 1(2)</td><td><code>lemma1_sunk</code></td><td>Full</td></tr>
+<tr><td>Lemma 1(3)</td><td><code>lemma1_remediable</code></td><td>Full (requires \(\tfix \ge 0\))</td></tr>
+<tr><td>Lemma 1(4)</td><td><code>lemma1_safe</code></td><td>Full</td></tr>
+<tr><td>Lemma 2</td><td><code>lemma2_max</code>, <code>lemma2_min</code>, <code>lemma2_hybrid_le</code></td><td>Full</td></tr>
+<tr><td>Proposition 1</td><td><code>prop1_dominance</code>, <code>prop1_expected</code></td><td>Per realization and in expectation</td></tr>
+<tr><td>Proposition 2</td><td><code>prop2_monotone</code>, <code>Wb_mono</code>, <code>prop2_expected</code></td><td>Per realization and in expectation</td></tr>
+<tr><td>Proposition 3</td><td><code>prop3_zero_iff</code>, <code>prop3_channel_zero_iff</code>, <code>prop3_all_safe</code>, <code>W_eq_zero_iff</code>, <code>prop3_expected</code></td><td>Per realization; in expectation as an almost-sure condition</td></tr>
+<tr><td>Proposition 4</td><td><code>prop4_fixpoint</code>, <code>prop4_least</code>, <code>prop4_scc</code>, <code>prop4_condensation</code></td><td>Fixpoint, least pre-fixpoint, constancy on components, condensation recurrence. Termination and running time of Appendix A are not formalized</td></tr>
+<tr><td>Proposition 7(a)</td><td><code>prop7_point_mass</code></td><td>Per realization of \(\Tq\)</td></tr>
+<tr><td>Proposition 7(b)</td><td><code>prop7_classical_share</code></td><td>Per realization of \(\Tq\)</td></tr>
+<tr><td>Proposition 7(c)</td><td><code>prop7_le_worst</code>, <code>prop7_risk_le_worst</code></td><td>Per realization; shares may sum to at most 1</td></tr>
+<tr><td>Proposition 7(d)</td><td><code>prop7_dominance</code>, <code>prop7_monotone</code></td><td>Per realization of \(\Tq\)</td></tr>
+<tr><td>Proposition 7(e)</td><td><code>prop7_mixW_zero_iff</code>, <code>prop7_zero_iff</code></td><td>Per realization of \(\Tq\)</td></tr>
+<tr><td>Proposition 7(f)</td><td><code>prop7_remediable</code></td><td>Requires \(\tfix \ge 0\)</td></tr>
+<tr><td>Proposition 6</td><td><code>prop6_layercake</code></td><td>Stated with \(\Pr[T \lt s]\), which equals \(F(s)\) for all but countably many \(s\)</td></tr>
+<tr><td>Corollary 1</td><td><code>cor1_hybrid</code>, <code>cor1_upper</code></td><td>Joint form and upper Fréchet bound. The independence and lower-bound forms are not formalized</td></tr>
+<tr><td>Proposition 8</td><td><code>prop8_values</code>, <code>prop8_not_submodular</code></td><td>Counterexample, checked by <code>decide</code></td></tr>
+<tr><td>Test vectors</td><td><code>vec_*</code> (10 theorems)</td><td>Window values, including those behind Table 6, proved by <code>norm_num</code> and checked against the scorer</td></tr>
+</tbody>
+<caption>Table 13. Correspondence between paper results and Lean theorems. Not formalized: Proposition 5 and the termination and running time of the algorithm of Appendix A, the expectation forms of Proposition 7, the independence and lower-bound forms of Corollary 1, and the NP-hardness results, which reduce to cited work.</caption>
+</table></div>
+</section>
+
+<section id="appC">
+<div class="note">
+<h3>Editor's note: changes from the previous draft (remove before submission)</h3>
+<ul>
+  <li>§7 example sensitivity: \(\Tq = 15\) gives \(R = 2.0\), not 7.0.</li>
+  <li>Classification now enters every score through break times; the local score no longer assigns risk to quantum-safe assets.</li>
+  <li>Propagated risk is proved to dominate local risk (Prop. 1).</li>
+  <li>Primitives moved to channel bundles and trust-graph keys, so the model and example use the same types; \(L\) belongs to data classes.</li>
+  <li>Bulk cipher and key establishment are separated; "AES-256 (safe)" is replaced with full bundles.</li>
+  <li>Forward-secrecy text corrected: forward secrecy does not protect against HNDL. The sunk/remediable split replaces it.</li>
+  <li>TNFL uses an acceptance horizon (minimum, not sum), propagates down the trust graph, and covers long-lived signatures.</li>
+  <li>Cycle handling: the infinite-loop claim was removed; fixpoint and condensation equivalence are proved, and the linear bound is stated per lifespan tier.</li>
+  <li>Exposure attaches to observable channels; migration time attaches to the channel being fixed, not the asset.</li>
+  <li>Classification fixes: 3DES moved to classically broken; Grover margin is a policy choice; Shor speedup described as super-polynomial; hashes and LMS/XMSS added; downgrade scoped to active/TNFL.</li>
+  <li>Added related work, threat model and assumptions, remediation complexity, discovery limits of active probing, CBOM property mapping, generalization, extensions, and an evaluation plan. Removed the duplicated §5 paragraph, the uncited weighted-average claim, and unsupported uses of "rigorous."</li>
+  <li>Citations: Mosca dated 2018 (preprint 2015); CBOM attributed to CycloneDX 1.6.</li>
+  <li>Added §2.5 on quantitative and formal PQC migration models, positioned the paper as extending Loebenberger, Gazdag et al. (2024), reframed the HNDL/TNFL split as a refinement, and compared with prior work in §6.1, §6.5 and §8.2. References marked in orange were found through search results only; confirm their titles and authors before submission.</li>
+  <li>Replaced the §13 evaluation plan with results from a local testbed run (120-second window) and a six-server Hetzner Cloud run (15-minute window), including SSH key-exchange discovery (§13.8).</li>
+  <li>Added §6.6 and Proposition 7 (session mixtures, Lean-checked), so that channels negotiating several configurations are scored by measured shares. Non-submodularity is renumbered from Proposition 7 to Proposition 8. §13.4–13.5 report both readings, which reverse the remediation ranking. The abstract, contributions and conclusion are updated to match.</li>
+  <li>Relaxed A6: post-quantum schemes may have a finite or random break time \(T_{\mathrm{PQ}}\). Added Lemma 2 (windows under composition, Lean-checked), Corollary 1 (expected exposure of hybrids, with Fréchet bounds when the two breaks are dependent), and a sensitivity analysis in §13.7. SSH moves to §13.8 and threats to validity to §13.9.</li>
+  <li>Added §13.9 on synthetic topologies: engine validation against the testbed, scaling, inference precision, rank stability under parameter noise and alternative priors, and greedy against optimal selection. §8.2's heuristic is specified as a group-aware greedy. Threats to validity move to §13.10, and the next steps reduce to the production case study.</li>
+  <li>Probe coverage: TLS 1.2 ECDHE groups are now enumerated (with the RFC 8422 certificate-curve correction), and a local run with an SSH plane measures negotiated SSH key exchange from captured KEXINIT messages (§13.2, §13.8). The cloud-run SSH section is now part of §13.8.</li>
+  <li>References checked against the publishers' pages and arXiv. Corrected titles and authors for Ajith et al., Erlemann et al., Grigaliūnas &amp; Brūzgienė, Hasan et al. (now cited as published in <em>IEEE Access</em>) and Loebenberger et al. Added authors and titles for Shaw, Alam and Figueira et al. (SBSeg 2026, not 2025). Descriptions of Loebenberger et al., Erlemann et al., Rufino et al. and Alam were revised to match the abstracts. The claim that Alam separates confidentiality from authentication was not supported by the abstract and was removed. The SBSeg author names were confirmed from the paper's PDF and Crossref, and the <em>Cybersecurity</em> article (Gupta &amp; Mittal, 2026) from its Crossref record; its description was made precise. Tables are renumbered in reading order, and a Declarations section is added.</li>
+  <li><strong>Before submission (author):</strong> add a funding statement if the venue requires one; add any statement on AI assistance that the venue requires; choose the venue and convert to its template; remove this note.</li>
+  <li>Lean now also covers Proposition 4 (fixpoint, least pre-fixpoint, constancy on strongly connected components, condensation recurrence), the expectation forms of Propositions 1–3, Proposition 6 (layer cake), and Corollary 1 (joint form and upper bound): 35 theorems in total, using only the standard axioms.</li>
+  <li>Added ten Lean-proved test vectors (<code>vec_*</code>) and a property-based test suite that checks every formalized statement against the scorer and the synthetic engine (Appendix D).</li>
+</ul>
+</div>
+</section>
+</main>

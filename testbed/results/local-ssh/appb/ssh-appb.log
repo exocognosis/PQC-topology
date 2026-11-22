@@ -1,0 +1,51 @@
+start 2026-11-22T00:17:34Z class=appb OpenSSH_10.0p2, OpenSSL 3.5.9 29 Sep 2026
+ssh: connect to host data port 22: Connection refused
+2026-11-22T00:17:34Z fail
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:17:40Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:17:45Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:17:50Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:17:55Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:00Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:05Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:10Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:16Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:21Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:26Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:31Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:36Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:41Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:46Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:52Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:18:57Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:19:02Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:19:07Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:19:12Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:19:17Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:19:22Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:19:28Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:19:33Z ok
+debug1: permanently_set_uid: 0/0
+2026-11-22T00:19:38Z ok

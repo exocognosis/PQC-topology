@@ -1,0 +1,1 @@
+2026/11/22 00:17:34 [error] 9#9: *1 connect() failed (111: Connection refused) while connecting to upstream, client: 10.42.1.11, server: appa, request: "GET /records HTTP/1.0", upstream: "https://10.42.1.13:7443/records.json", host: "appa:9443"

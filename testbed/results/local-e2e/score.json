@@ -1,0 +1,652 @@
+{
+  "discovery": {
+    "listeners": [
+      {
+        "listener": "gw:443",
+        "versions": {
+          "tp": 2,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "groups": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_ciphers": {
+          "tp": 3,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_groups": null,
+        "cert_key_ok": true,
+        "cert_sig_ok": true
+      },
+      {
+        "listener": "lb:8443",
+        "versions": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "groups": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_ciphers": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_groups": null,
+        "cert_key_ok": true,
+        "cert_sig_ok": true
+      },
+      {
+        "listener": "appa:9443",
+        "versions": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "groups": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_ciphers": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_groups": null,
+        "cert_key_ok": true,
+        "cert_sig_ok": true
+      },
+      {
+        "listener": "appb:9444",
+        "versions": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "groups": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_ciphers": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_groups": null,
+        "cert_key_ok": true,
+        "cert_sig_ok": true
+      },
+      {
+        "listener": "data:7443",
+        "versions": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "groups": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_ciphers": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 0,
+          "precision": 1.0,
+          "recall": 1.0
+        },
+        "tls12_groups": null,
+        "cert_key_ok": true,
+        "cert_sig_ok": true
+      }
+    ],
+    "static": [
+      {
+        "cert": "root-rsa",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      },
+      {
+        "cert": "int-ecdsa",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      },
+      {
+        "cert": "root-mldsa",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      },
+      {
+        "cert": "gw",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      },
+      {
+        "cert": "lb",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      },
+      {
+        "cert": "appa",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      },
+      {
+        "cert": "appb",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      },
+      {
+        "cert": "lb-client",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      },
+      {
+        "cert": "fw-signer",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      },
+      {
+        "cert": "data",
+        "found": true,
+        "key_ok": true,
+        "sig_ok": true
+      }
+    ],
+    "overall": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "certs_correct": "5/5",
+      "static_certs_correct": "10/10"
+    }
+  },
+  "supported_vs_negotiated": [
+    {
+      "listener": "gw:443",
+      "supported": [
+        "X25519MLKEM768",
+        "X25519",
+        "prime256v1"
+      ],
+      "negotiated": {
+        "X25519MLKEM768": 0.742,
+        "X25519": 0.258
+      },
+      "handshakes_logged": 477
+    },
+    {
+      "listener": "lb:8443",
+      "supported": [
+        "(TLS 1.2 RSA kex)"
+      ],
+      "negotiated": {
+        "TLSv1.2 AES256-GCM-SHA384": 1.0
+      },
+      "handshakes_logged": 477
+    },
+    {
+      "listener": "appa:9443",
+      "supported": [
+        "X25519"
+      ],
+      "negotiated": {
+        "X25519": 1.0
+      },
+      "handshakes_logged": 636
+    },
+    {
+      "listener": "appb:9444",
+      "supported": [
+        "X25519"
+      ],
+      "negotiated": {
+        "X25519": 1.0
+      },
+      "handshakes_logged": 318
+    },
+    {
+      "listener": "data:7443",
+      "supported": [
+        "X25519MLKEM768"
+      ],
+      "negotiated": {
+        "X25519MLKEM768": 1.0
+      },
+      "handshakes_logged": 159
+    }
+  ],
+  "passive_agreement": [
+    {
+      "channel": "appa->appb",
+      "log_groups": [
+        "X25519"
+      ],
+      "pcap_groups": [
+        "X25519"
+      ],
+      "pcap_handshakes": 159,
+      "agree": "yes"
+    },
+    {
+      "channel": "appa->lb",
+      "log_groups": [
+        "X25519"
+      ],
+      "pcap_groups": [
+        "X25519"
+      ],
+      "pcap_handshakes": 477,
+      "agree": "yes"
+    },
+    {
+      "channel": "appb->appa",
+      "log_groups": [
+        "X25519"
+      ],
+      "pcap_groups": [
+        "X25519"
+      ],
+      "pcap_handshakes": 318,
+      "agree": "yes"
+    },
+    {
+      "channel": "data->appa",
+      "log_groups": [
+        "X25519MLKEM768"
+      ],
+      "pcap_groups": [
+        "X25519MLKEM768"
+      ],
+      "pcap_handshakes": 159,
+      "agree": "yes"
+    },
+    {
+      "channel": "gw->client",
+      "log_groups": [
+        "X25519",
+        "X25519MLKEM768"
+      ],
+      "pcap_groups": [
+        "X25519",
+        "X25519MLKEM768"
+      ],
+      "pcap_handshakes": 477,
+      "agree": "yes"
+    },
+    {
+      "channel": "lb->gw",
+      "log_groups": [
+        "-"
+      ],
+      "pcap_groups": [
+        "-"
+      ],
+      "pcap_handshakes": 477,
+      "agree": "yes"
+    }
+  ],
+  "hndl": {
+    "records": {
+      "labeled_channels": [
+        "data->appa",
+        "appa->lb",
+        "lb->gw",
+        "gw->client"
+      ],
+      "inferred_channels": [
+        "appa->appb",
+        "appa->lb",
+        "appb->appa",
+        "data->appa",
+        "gw->client",
+        "lb->gw"
+      ],
+      "inference_extra": [
+        "appa->appb",
+        "appb->appa"
+      ],
+      "endpoint_view": [
+        "X25519MLKEM768"
+      ],
+      "scenarios": {
+        "T_Q=5": {
+          "local": 0.0,
+          "labeled": 11.0,
+          "labeled_sunk": 10.0,
+          "labeled_remediable": 1.0,
+          "inferred": 11.0,
+          "inferred_sunk": 10.0,
+          "share": {
+            "local": 0.0,
+            "labeled": 6.0,
+            "labeled_sunk": 5.0,
+            "labeled_remediable": 1.0,
+            "inferred": 6.0
+          }
+        },
+        "T_Q=10": {
+          "local": 0.0,
+          "labeled": 6.0,
+          "labeled_sunk": 5.0,
+          "labeled_remediable": 1.0,
+          "inferred": 6.0,
+          "inferred_sunk": 5.0,
+          "share": {
+            "local": 0.0,
+            "labeled": 3.5,
+            "labeled_sunk": 2.5,
+            "labeled_remediable": 1.0,
+            "inferred": 3.5
+          }
+        },
+        "T_Q=15": {
+          "local": 0.0,
+          "labeled": 1.0,
+          "labeled_sunk": 0.0,
+          "labeled_remediable": 1.0,
+          "inferred": 1.0,
+          "inferred_sunk": 0.0,
+          "share": {
+            "local": 0.0,
+            "labeled": 1.0,
+            "labeled_sunk": 0.0,
+            "labeled_remediable": 1.0,
+            "inferred": 1.0
+          }
+        },
+        "E[T_Q~U(5,20)]": {
+          "local": 0.0,
+          "labeled": 4.067,
+          "labeled_sunk": 3.334,
+          "labeled_remediable": 0.733,
+          "inferred": 4.067,
+          "inferred_sunk": 3.334,
+          "share": {
+            "local": 0.0,
+            "labeled": 2.4,
+            "labeled_sunk": 1.667,
+            "labeled_remediable": 0.733,
+            "inferred": 2.4
+          }
+        }
+      }
+    },
+    "profile": {
+      "labeled_channels": [
+        "appb->appa",
+        "appa->lb",
+        "lb->gw",
+        "gw->client"
+      ],
+      "inferred_channels": [
+        "appa->appb",
+        "appa->lb",
+        "appb->appa",
+        "gw->client",
+        "lb->gw"
+      ],
+      "inference_extra": [
+        "appa->appb"
+      ],
+      "endpoint_view": [
+        "X25519"
+      ],
+      "scenarios": {
+        "T_Q=5": {
+          "local": 0.3,
+          "labeled": 2.4,
+          "labeled_sunk": 1.8,
+          "labeled_remediable": 0.6,
+          "inferred": 2.4,
+          "inferred_sunk": 1.8,
+          "share": {
+            "local": 0.3,
+            "labeled": 1.5,
+            "labeled_sunk": 0.9,
+            "labeled_remediable": 0.6,
+            "inferred": 1.5
+          }
+        },
+        "T_Q=10": {
+          "local": 0.0,
+          "labeled": 0.0,
+          "labeled_sunk": 0.0,
+          "labeled_remediable": 0.0,
+          "inferred": 0.0,
+          "inferred_sunk": 0.0,
+          "share": {
+            "local": 0.0,
+            "labeled": 0.0,
+            "labeled_sunk": 0.0,
+            "labeled_remediable": 0.0,
+            "inferred": 0.0
+          }
+        },
+        "T_Q=15": {
+          "local": 0.0,
+          "labeled": 0.0,
+          "labeled_sunk": 0.0,
+          "labeled_remediable": 0.0,
+          "inferred": 0.0,
+          "inferred_sunk": 0.0,
+          "share": {
+            "local": 0.0,
+            "labeled": 0.0,
+            "labeled_sunk": 0.0,
+            "labeled_remediable": 0.0,
+            "inferred": 0.0
+          }
+        },
+        "E[T_Q~U(5,20)]": {
+          "local": 0.05,
+          "labeled": 0.34,
+          "labeled_sunk": 0.18,
+          "labeled_remediable": 0.16,
+          "inferred": 0.34,
+          "inferred_sunk": 0.18,
+          "share": {
+            "local": 0.05,
+            "labeled": 0.25,
+            "labeled_sunk": 0.09,
+            "labeled_remediable": 0.16,
+            "inferred": 0.25
+          }
+        }
+      }
+    }
+  },
+  "remediation": [
+    {
+      "channel": "gw->client",
+      "risk_reduction": 0.68,
+      "risk_reduction_share": 0.0
+    },
+    {
+      "channel": "lb->gw",
+      "risk_reduction": 0.03,
+      "risk_reduction_share": 0.733
+    },
+    {
+      "channel": "appa->appb",
+      "risk_reduction": 0.0,
+      "risk_reduction_share": 0.0
+    },
+    {
+      "channel": "appa->lb",
+      "risk_reduction": 0.0,
+      "risk_reduction_share": 0.0
+    },
+    {
+      "channel": "appb->appa",
+      "risk_reduction": 0.0,
+      "risk_reduction_share": 0.0
+    },
+    {
+      "channel": "data->appa",
+      "risk_reduction": 0.0,
+      "risk_reduction_share": 0.0
+    }
+  ],
+  "tnfl": {
+    "keys": {
+      "fw-signer": {
+        "tau": 3,
+        "S": 0.0,
+        "quantum_vulnerable": true
+      },
+      "int-ecdsa": {
+        "tau": 3,
+        "S": 0.0,
+        "quantum_vulnerable": true
+      },
+      "root-mldsa": {
+        "tau": 20,
+        "S": 0.0,
+        "quantum_vulnerable": false
+      },
+      "root-rsa": {
+        "tau": 20,
+        "S": 7.5,
+        "quantum_vulnerable": true
+      }
+    },
+    "artifacts": {
+      "firmware.bin": {
+        "chain": [
+          "fw-signer",
+          "int-ecdsa",
+          "root-rsa"
+        ],
+        "R_T": 7.5,
+        "dominant_key": "root-rsa"
+      }
+    }
+  },
+  "pq_sensitivity": [
+    {
+      "T_PQ": 20,
+      "hndl": {
+        "records": {
+          "worst": 4.067,
+          "share": 2.4
+        },
+        "profile": {
+          "worst": 0.34,
+          "share": 0.25
+        }
+      },
+      "tnfl": {
+        "fw-signer": 0.0,
+        "int-ecdsa": 0.0,
+        "root-mldsa": 0.0,
+        "root-rsa": 7.5
+      }
+    },
+    {
+      "T_PQ": 15,
+      "hndl": {
+        "records": {
+          "worst": 4.067,
+          "share": 2.4
+        },
+        "profile": {
+          "worst": 0.34,
+          "share": 0.25
+        }
+      },
+      "tnfl": {
+        "fw-signer": 0.0,
+        "int-ecdsa": 0.0,
+        "root-mldsa": 5.0,
+        "root-rsa": 7.5
+      }
+    },
+    {
+      "T_PQ": 10,
+      "hndl": {
+        "records": {
+          "worst": 4.067,
+          "share": 3.448
+        },
+        "profile": {
+          "worst": 0.34,
+          "share": 0.25
+        }
+      },
+      "tnfl": {
+        "fw-signer": 0.0,
+        "int-ecdsa": 0.0,
+        "root-mldsa": 10.0,
+        "root-rsa": 7.5
+      }
+    },
+    {
+      "T_PQ": 5,
+      "hndl": {
+        "records": {
+          "worst": 4.067,
+          "share": 4.067
+        },
+        "profile": {
+          "worst": 0.34,
+          "share": 0.34
+        }
+      },
+      "tnfl": {
+        "fw-signer": 0.0,
+        "int-ecdsa": 0.0,
+        "root-mldsa": 15.0,
+        "root-rsa": 7.5
+      }
+    }
+  ],
+  "ssh_plane": null,
+  "scenario_for_rankings": "E[T_Q~U(5,20)]",
+  "ssh": []
+}

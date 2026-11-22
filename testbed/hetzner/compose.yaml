@@ -1,0 +1,73 @@
+# Per-server services for the Hetzner deployment. Each server starts only its
+# own profile, e.g.  docker compose -f hetzner/compose.yaml --profile lb up -d
+# Host networking: services bind the server's own addresses, and tcpdump sees
+# the real interfaces.
+name: pqc-testbed
+
+x-estate-hosts: &estate_hosts
+  - "gw:10.42.1.10"
+  - "lb:10.42.1.11"
+  - "appa:10.42.1.12"
+  - "data:10.42.1.13"
+  - "appb:10.42.1.14"
+
+x-svc: &svc
+  image: pqc-nginx
+  network_mode: host
+  cap_add: [NET_ADMIN, NET_RAW]
+  extra_hosts: *estate_hosts
+
+services:
+  gw:
+    <<: *svc
+    profiles: [gw]
+    environment: { ROLE: gw, CAPTURE: "1" }
+    volumes: ["../roles/gw/nginx.conf:/etc/nginx/nginx.conf:ro", "../pki/out:/pki:ro", "../run/gw:/run-out"]
+  lb:
+    <<: *svc
+    profiles: [lb]
+    environment: { ROLE: lb, CAPTURE: "1" }
+    volumes: ["../roles/lb/nginx.conf:/etc/nginx/nginx.conf:ro", "../pki/out:/pki:ro", "../run/lb:/run-out"]
+  appa:
+    <<: *svc
+    profiles: [appa]
+    environment: { ROLE: appa, CAPTURE: "1" }
+    volumes: ["../roles/appa/nginx.conf:/etc/nginx/nginx.conf:ro", "../pki/out:/pki:ro", "../run/appa:/run-out"]
+  appb:
+    <<: *svc
+    profiles: [appb]
+    environment: { ROLE: appb, CAPTURE: "1" }
+    volumes: ["../roles/appb/nginx.conf:/etc/nginx/nginx.conf:ro", "../pki/out:/pki:ro", "../run/appb:/run-out"]
+  data:
+    <<: *svc
+    profiles: [data]
+    environment: { ROLE: data, CAPTURE: "1" }
+    volumes: ["../roles/data/nginx.conf:/etc/nginx/nginx.conf:ro", "../roles/data/records:/srv/records:ro",
+              "../pki/out:/pki:ro", "../run/data:/run-out"]
+
+  # Client server: traffic goes to the gateway's PUBLIC address.
+  client-modern:
+    image: pqc-nginx
+    network_mode: host
+    profiles: [client]
+    environment: { ROLE: client, CLIENT_CLASS: modern, INTERVAL: "1" }
+    extra_hosts: ["gw:${GW_PUBLIC_IP:-0.0.0.0}"]
+    volumes: ["../clients:/clients:ro", "../pki/out:/pki:ro", "../run/client:/run-out"]
+  client-legacy:
+    image: pqc-legacy-client
+    network_mode: host
+    profiles: [client]
+    environment: { CLIENT_CLASS: legacy, INTERVAL: "3" }
+    extra_hosts: ["gw:${GW_PUBLIC_IP:-0.0.0.0}"]
+    volumes: ["../clients:/clients:ro", "../pki/out:/pki:ro", "../run/client:/run-out"]
+
+  # Probe from the client server's private address (10.42.1.30).
+  probe:
+    <<: *svc
+    profiles: [probe]
+    environment: { ROLE: probe }
+    volumes: ["../tools:/tools:ro", "../groundtruth.json:/groundtruth.json:ro",
+              "../pki/out:/artifacts:ro", "../run/probe:/run-out"]
+    command: ["python3", "/tools/probe.py", "--groundtruth", "/groundtruth.json",
+              "--static-dir", "/artifacts", "--ssh", "gw", "lb", "appa", "appb", "data",
+              "--out", "/run-out/probe.json"]

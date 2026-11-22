@@ -1,0 +1,15 @@
+#cloud-config
+package_update: true
+packages:
+  - docker.io
+  - docker-compose-v2
+  - rsync
+  - tcpdump
+write_files:
+  - path: /etc/hosts.testbed
+    content: |
+      ${indent(6, hosts_block)}
+runcmd:
+  - [sh, -c, "cat /etc/hosts.testbed >> /etc/hosts"]
+  - [systemctl, enable, --now, docker]
+  - [mkdir, -p, /opt/testbed]

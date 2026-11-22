@@ -1,0 +1,440 @@
+{
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.6",
+  "version": 1,
+  "metadata": {
+    "component": {
+      "type": "application",
+      "name": "pqc-topology-testbed"
+    }
+  },
+  "components": [
+    {
+      "type": "cryptographic-asset",
+      "name": "X25519",
+      "cryptoProperties": {
+        "assetType": "algorithm",
+        "algorithmProperties": {
+          "primitive": "key-agree"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:break-time-class",
+          "value": "shor-vulnerable"
+        }
+      ],
+      "bom-ref": "algo:X25519"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "X25519MLKEM768",
+      "cryptoProperties": {
+        "assetType": "algorithm",
+        "algorithmProperties": {
+          "primitive": "kem"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:break-time-class",
+          "value": "hybrid"
+        }
+      ],
+      "bom-ref": "algo:X25519MLKEM768"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "TLS gw->client",
+      "cryptoProperties": {
+        "assetType": "protocol",
+        "protocolProperties": {
+          "type": "tls",
+          "cipherSuites": [
+            {
+              "name": "TLS_AES_256_GCM_SHA384"
+            },
+            {
+              "name": "TLS_AES_256_GCM_SHA384"
+            }
+          ]
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:channel",
+          "value": "gw->client"
+        },
+        {
+          "name": "dytallix:negotiated:TLSv1.3:X25519",
+          "value": "0.268"
+        },
+        {
+          "name": "dytallix:negotiated:TLSv1.3:X25519MLKEM768",
+          "value": "0.732"
+        }
+      ],
+      "bom-ref": "proto:gw->client"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "TLS lb->gw",
+      "cryptoProperties": {
+        "assetType": "protocol",
+        "protocolProperties": {
+          "type": "tls",
+          "cipherSuites": [
+            {
+              "name": "AES256-GCM-SHA384"
+            }
+          ]
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:channel",
+          "value": "lb->gw"
+        },
+        {
+          "name": "dytallix:negotiated:TLSv1.2:-",
+          "value": "1.000"
+        }
+      ],
+      "bom-ref": "proto:lb->gw"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "TLS appa->lb",
+      "cryptoProperties": {
+        "assetType": "protocol",
+        "protocolProperties": {
+          "type": "tls",
+          "cipherSuites": [
+            {
+              "name": "TLS_AES_256_GCM_SHA384"
+            }
+          ]
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:channel",
+          "value": "appa->lb"
+        },
+        {
+          "name": "dytallix:negotiated:TLSv1.3:X25519",
+          "value": "1.000"
+        }
+      ],
+      "bom-ref": "proto:appa->lb"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "TLS appa->appb",
+      "cryptoProperties": {
+        "assetType": "protocol",
+        "protocolProperties": {
+          "type": "tls",
+          "cipherSuites": [
+            {
+              "name": "TLS_AES_256_GCM_SHA384"
+            }
+          ]
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:channel",
+          "value": "appa->appb"
+        },
+        {
+          "name": "dytallix:negotiated:TLSv1.3:X25519",
+          "value": "1.000"
+        }
+      ],
+      "bom-ref": "proto:appa->appb"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "TLS appb->appa",
+      "cryptoProperties": {
+        "assetType": "protocol",
+        "protocolProperties": {
+          "type": "tls",
+          "cipherSuites": [
+            {
+              "name": "TLS_AES_256_GCM_SHA384"
+            }
+          ]
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:channel",
+          "value": "appb->appa"
+        },
+        {
+          "name": "dytallix:negotiated:TLSv1.3:X25519",
+          "value": "1.000"
+        }
+      ],
+      "bom-ref": "proto:appb->appa"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "TLS data->appa",
+      "cryptoProperties": {
+        "assetType": "protocol",
+        "protocolProperties": {
+          "type": "tls",
+          "cipherSuites": [
+            {
+              "name": "TLS_AES_256_GCM_SHA384"
+            }
+          ]
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:channel",
+          "value": "data->appa"
+        },
+        {
+          "name": "dytallix:negotiated:TLSv1.3:X25519MLKEM768",
+          "value": "1.000"
+        }
+      ],
+      "bom-ref": "proto:data->appa"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "appa",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=appa",
+          "issuerName": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+          "notValidAfter": "Dec 24 15:52:29 2027 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "EC-P256"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "ecdsa-with-SHA256"
+        }
+      ],
+      "bom-ref": "cert:appa"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "appb",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=appb",
+          "issuerName": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+          "notValidAfter": "Dec 24 15:52:29 2027 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "EC-P256"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "ecdsa-with-SHA256"
+        }
+      ],
+      "bom-ref": "cert:appb"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "data",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=data",
+          "issuerName": "O=PQC Testbed, CN=PQ Root (ML-DSA-65)",
+          "notValidAfter": "Dec 24 15:52:29 2027 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "ML-DSA-65"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "ML-DSA-65"
+        }
+      ],
+      "bom-ref": "cert:data"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "fw-signer",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=fw-signer",
+          "issuerName": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+          "notValidAfter": "Nov 20 15:52:29 2029 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "EC-P256"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "ecdsa-with-SHA256"
+        }
+      ],
+      "bom-ref": "cert:fw-signer"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "gw",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=gw",
+          "issuerName": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+          "notValidAfter": "Dec 24 15:52:29 2027 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "EC-P256"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "ecdsa-with-SHA256"
+        }
+      ],
+      "bom-ref": "cert:gw"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "int-ecdsa",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+          "issuerName": "O=PQC Testbed, CN=Legacy Root (RSA-4096)",
+          "notValidAfter": "Nov 20 15:52:29 2031 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "EC-P256"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "sha256WithRSAEncryption"
+        }
+      ],
+      "bom-ref": "cert:int-ecdsa"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "lb-client",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=lb-client",
+          "issuerName": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+          "notValidAfter": "Dec 24 15:52:29 2027 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "EC-P256"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "ecdsa-with-SHA256"
+        }
+      ],
+      "bom-ref": "cert:lb-client"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "lb",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=lb",
+          "issuerName": "O=PQC Testbed, CN=Issuing CA (ECDSA P-256)",
+          "notValidAfter": "Dec 24 15:52:29 2027 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "RSA-2048"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "ecdsa-with-SHA256"
+        }
+      ],
+      "bom-ref": "cert:lb"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "root-mldsa",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=PQ Root (ML-DSA-65)",
+          "issuerName": "O=PQC Testbed, CN=PQ Root (ML-DSA-65)",
+          "notValidAfter": "Nov 18 15:52:29 2036 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "ML-DSA-65"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "ML-DSA-65"
+        }
+      ],
+      "bom-ref": "cert:root-mldsa"
+    },
+    {
+      "type": "cryptographic-asset",
+      "name": "root-rsa",
+      "cryptoProperties": {
+        "assetType": "certificate",
+        "certificateProperties": {
+          "subjectName": "O=PQC Testbed, CN=Legacy Root (RSA-4096)",
+          "issuerName": "O=PQC Testbed, CN=Legacy Root (RSA-4096)",
+          "notValidAfter": "Nov 16 15:52:29 2046 GMT"
+        }
+      },
+      "properties": [
+        {
+          "name": "dytallix:key-algorithm",
+          "value": "RSA-4096"
+        },
+        {
+          "name": "dytallix:signature-algorithm",
+          "value": "sha256WithRSAEncryption"
+        }
+      ],
+      "bom-ref": "cert:root-rsa"
+    }
+  ]
+}

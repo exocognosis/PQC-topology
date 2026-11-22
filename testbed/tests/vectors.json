@@ -1,0 +1,15 @@
+{
+  "_comment": "Exposure-window test vectors W(t_fix, H, L, T) (Definition 4). gen_lean_vectors.py proves each one in lean/TopoPQC.lean; test_properties.py checks them against tools/score.py.",
+  "vectors": [
+    {"name": "edge_tq10",        "tfix": 1, "H": 20, "L": 15, "T": 10, "W": 6,  "note": "gw->client, records, T_Q = 10 (Table 6)"},
+    {"name": "lb_tq10",          "tfix": 2, "H": 20, "L": 15, "T": 10, "W": 7,  "note": "lb->gw, records, T_Q = 10"},
+    {"name": "lb_sunk_tq10",     "tfix": 0, "H": 20, "L": 15, "T": 10, "W": 5,  "note": "sunk window of lb->gw"},
+    {"name": "edge_tq5",         "tfix": 1, "H": 20, "L": 15, "T": 5,  "W": 11, "note": "records, T_Q = 5"},
+    {"name": "edge_tq15",        "tfix": 1, "H": 20, "L": 15, "T": 15, "W": 1,  "note": "records, T_Q = 15: remediable part only"},
+    {"name": "edge_tq20",        "tfix": 1, "H": 20, "L": 15, "T": 20, "W": 0,  "note": "break after the data stops being sensitive"},
+    {"name": "short_history",    "tfix": 2, "H": 3,  "L": 15, "T": 5,  "W": 5,  "note": "history shorter than L - T"},
+    {"name": "profile_tq10",     "tfix": 1, "H": 20, "L": 8,  "T": 10, "W": 0,  "note": "profile, T_Q = 10"},
+    {"name": "broken_now",       "tfix": 1, "H": 20, "L": 8,  "T": 0,  "W": 9,  "note": "classically broken layer, T = 0"},
+    {"name": "no_history",       "tfix": 0, "H": 0,  "L": 15, "T": 5,  "W": 0,  "note": "fixed now with no recorded history"}
+  ]
+}

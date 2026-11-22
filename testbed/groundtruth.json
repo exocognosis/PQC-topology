@@ -1,0 +1,342 @@
+{
+  "_comment": "Declared configuration of the testbed. The scorer compares discovery against this file. Model parameters (C, L, O, t_fix, H, tau inputs) are inputs, not measurements.",
+  "hosts": {
+    "gw": {
+      "private": "10.42.1.10",
+      "local_extra": [
+        "172.30.0.10"
+      ]
+    },
+    "lb": {
+      "private": "10.42.1.11"
+    },
+    "appa": {
+      "private": "10.42.1.12"
+    },
+    "data": {
+      "private": "10.42.1.13"
+    },
+    "appb": {
+      "private": "10.42.1.14"
+    },
+    "client": {
+      "private": null,
+      "local_extra": [
+        "172.30.0.21",
+        "172.30.0.22"
+      ]
+    },
+    "probe": {
+      "private": "10.42.1.30",
+      "_comment": "scanner vantage point; its handshakes are excluded from channel telemetry"
+    },
+    "ops": {
+      "private": "10.42.1.21",
+      "_comment": "legacy operations host (OpenSSH 8.x) pulling backups over SSH; local runs only"
+    }
+  },
+  "listeners": [
+    {
+      "service": "gw",
+      "host": "gw",
+      "port": 443,
+      "tls_versions": [
+        "TLSv1.2",
+        "TLSv1.3"
+      ],
+      "groups": [
+        "X25519MLKEM768",
+        "X25519",
+        "prime256v1"
+      ],
+      "tls12_ciphers": [
+        "ECDHE-ECDSA-AES256-GCM-SHA384",
+        "ECDHE-ECDSA-AES128-GCM-SHA256",
+        "ECDHE-ECDSA-CHACHA20-POLY1305"
+      ],
+      "cert": "gw",
+      "client_auth": false,
+      "tls12_groups": [
+        "X25519",
+        "prime256v1"
+      ]
+    },
+    {
+      "service": "lb",
+      "host": "lb",
+      "port": 8443,
+      "tls_versions": [
+        "TLSv1.2"
+      ],
+      "groups": [],
+      "tls12_ciphers": [
+        "AES256-GCM-SHA384"
+      ],
+      "cert": "lb",
+      "client_auth": false,
+      "tls12_groups": []
+    },
+    {
+      "service": "appa",
+      "host": "appa",
+      "port": 9443,
+      "tls_versions": [
+        "TLSv1.3"
+      ],
+      "groups": [
+        "X25519"
+      ],
+      "tls12_ciphers": [],
+      "cert": "appa",
+      "client_auth": true,
+      "tls12_groups": []
+    },
+    {
+      "service": "appb",
+      "host": "appb",
+      "port": 9444,
+      "tls_versions": [
+        "TLSv1.3"
+      ],
+      "groups": [
+        "X25519"
+      ],
+      "tls12_ciphers": [],
+      "cert": "appb",
+      "client_auth": true,
+      "tls12_groups": []
+    },
+    {
+      "service": "data",
+      "host": "data",
+      "port": 7443,
+      "tls_versions": [
+        "TLSv1.3"
+      ],
+      "groups": [
+        "X25519MLKEM768"
+      ],
+      "tls12_ciphers": [],
+      "cert": "data",
+      "client_auth": false,
+      "tls12_groups": []
+    }
+  ],
+  "certs": {
+    "root-rsa": {
+      "key": "RSA-4096",
+      "sig": "sha256WithRSAEncryption",
+      "issuer": "root-rsa"
+    },
+    "int-ecdsa": {
+      "key": "EC-P256",
+      "sig": "sha256WithRSAEncryption",
+      "issuer": "root-rsa"
+    },
+    "root-mldsa": {
+      "key": "ML-DSA-65",
+      "sig": "ML-DSA-65",
+      "issuer": "root-mldsa"
+    },
+    "gw": {
+      "key": "EC-P256",
+      "sig": "ecdsa-with-SHA256",
+      "issuer": "int-ecdsa"
+    },
+    "lb": {
+      "key": "RSA-2048",
+      "sig": "ecdsa-with-SHA256",
+      "issuer": "int-ecdsa"
+    },
+    "appa": {
+      "key": "EC-P256",
+      "sig": "ecdsa-with-SHA256",
+      "issuer": "int-ecdsa"
+    },
+    "appb": {
+      "key": "EC-P256",
+      "sig": "ecdsa-with-SHA256",
+      "issuer": "int-ecdsa"
+    },
+    "lb-client": {
+      "key": "EC-P256",
+      "sig": "ecdsa-with-SHA256",
+      "issuer": "int-ecdsa"
+    },
+    "fw-signer": {
+      "key": "EC-P256",
+      "sig": "ecdsa-with-SHA256",
+      "issuer": "int-ecdsa"
+    },
+    "data": {
+      "key": "ML-DSA-65",
+      "sig": "ML-DSA-65",
+      "issuer": "root-mldsa"
+    }
+  },
+  "data_classes": {
+    "records": {
+      "origin": "data",
+      "C": 1.0,
+      "L": 15,
+      "labeled_flow": [
+        "data",
+        "appa",
+        "lb",
+        "gw",
+        "client"
+      ]
+    },
+    "profile": {
+      "origin": "appb",
+      "C": 0.6,
+      "L": 8,
+      "labeled_flow": [
+        "appb",
+        "appa",
+        "lb",
+        "gw",
+        "client"
+      ]
+    }
+  },
+  "channel_params": {
+    "_comment": "Read-path channel server->caller. O = observability; t_fix = years until remediated; H = years already carried in current configuration.",
+    "default": {
+      "O": 0.3,
+      "t_fix": 2,
+      "H": 20
+    },
+    "gw->client": {
+      "O": 1.0,
+      "t_fix": 1,
+      "H": 20
+    },
+    "lb->gw": {
+      "O": 0.5,
+      "t_fix": 2,
+      "H": 20
+    },
+    "appa->lb": {
+      "O": 0.3,
+      "t_fix": 2,
+      "H": 20
+    },
+    "data->appa": {
+      "O": 0.1,
+      "t_fix": 2,
+      "H": 20
+    },
+    "appb->appa": {
+      "O": 0.1,
+      "t_fix": 2,
+      "H": 20
+    },
+    "appa->appb": {
+      "O": 0.1,
+      "t_fix": 2,
+      "H": 20
+    },
+    "data->appb": {
+      "O": 0.1,
+      "t_fix": 2,
+      "H": 20
+    },
+    "data->ops": {
+      "O": 0.3,
+      "t_fix": 3,
+      "H": 20
+    }
+  },
+  "trust_params": {
+    "_comment": "Acceptance horizon inputs per key (years). verifier_updatable=false means verifiers cannot be updated (D = infinity). Lambda = remaining verifier service life.",
+    "root-rsa": {
+      "V": 20,
+      "expiry_enforced": false,
+      "T_mig": 3,
+      "D": null,
+      "verifier_updatable": false,
+      "Lambda": 20
+    },
+    "int-ecdsa": {
+      "V": 5,
+      "expiry_enforced": true,
+      "T_mig": 2,
+      "D": 1,
+      "verifier_updatable": true,
+      "Lambda": 20
+    },
+    "fw-signer": {
+      "V": 3,
+      "expiry_enforced": true,
+      "T_mig": 2,
+      "D": 1,
+      "verifier_updatable": true,
+      "Lambda": 20
+    },
+    "root-mldsa": {
+      "V": 10,
+      "expiry_enforced": false,
+      "T_mig": 3,
+      "D": null,
+      "verifier_updatable": false,
+      "Lambda": 20
+    }
+  },
+  "artifacts": {
+    "firmware.bin": {
+      "signature": "firmware.bin.p7s",
+      "signer": "fw-signer",
+      "C": 1.0,
+      "A": 1.0
+    }
+  },
+  "scenarios": {
+    "T_Q_points": [
+      5,
+      10,
+      15
+    ],
+    "T_Q_uniform": [
+      5,
+      20
+    ],
+    "T_PQ_points": [
+      20,
+      15,
+      10,
+      5
+    ],
+    "_comment_T_PQ": "Sensitivity: break time of the post-quantum components (ML-KEM, ML-DSA), assumption A6. Default is infinity."
+  },
+  "ssh_listeners": [
+    {
+      "host": "data",
+      "port": 22,
+      "kex": [
+        "mlkem768x25519-sha256",
+        "sntrup761x25519-sha512@openssh.com",
+        "curve25519-sha256",
+        "ecdh-sha2-nistp256"
+      ]
+    }
+  ],
+  "ssh_classes": {
+    "records-export": {
+      "_comment": "backups of the records data, pulled over SSH by appb (OpenSSH 10) and ops (OpenSSH 8.x); scored separately from the TLS plane",
+      "origin": "data",
+      "C": 1.0,
+      "L": 15,
+      "channels": [
+        [
+          "data",
+          "appb"
+        ],
+        [
+          "data",
+          "ops"
+        ]
+      ]
+    }
+  }
+}
